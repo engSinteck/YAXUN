@@ -31,7 +31,6 @@
 #define	LCD_RST_PORT							TFT_RST_GPIO_Port
 #define	LCD_RST_PIN								TFT_RST_Pin
 
-
 #define BURST_MAX_SIZE 	500
 
 #define BLACK       0x0000

@@ -41,9 +41,10 @@
 /* USER CODE BEGIN PTD */
 #define DEBOUNCE_SW 	50
 
+uint16_t adcBuffer[2]; 					// Buffer ADC conversion
 uint8_t buf_tft[320 * 10 * 2];
-static lv_obj_t * Tela_Principal;
-static lv_obj_t * Text_Header;
+//static lv_obj_t * Tela_Principal;
+//static lv_obj_t * Text_Header;
 
 uint32_t ADC_iron = 0, ADC_air = 0;
 uint32_t timer_led1 = 0, timer_led2 = 0, timer_led3 = 0, timer_led4 = 0;
@@ -61,16 +62,13 @@ volatile uint8_t sw_iron = 0;
 
 volatile uint32_t timer_key = 0;
 
-float iron_temp = 1.5f;
-float air_temp = 2.4f;
-float iron_preset = 3.6f;
-float air_preset = 4.8f;
+double adc_ch8, adc_ch9;
 
 volatile uint32_t enc1_cnt=0, enc1_dir=0, enc1_btn=0;
 volatile uint32_t enc2_cnt=0, enc2_dir=0, enc2_btn=0;
 volatile uint32_t enc3_cnt=0, enc3_dir=0, enc3_btn=0;
 
-float temp_iron, temp_air, target_iron, target_air;
+uint32_t target_iron, target_air, target_speed;
 uint32_t flag_iron, flag_air;
 
 /* USER CODE END PTD */
@@ -145,7 +143,11 @@ int main(void)
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
   HAL_TIM_PWM_Start(&htim9, TIM_CHANNEL_1);
-  __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, 0);	// PWM_CH1 = 0 IRON
+  __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, 0);		// PWM_CH1 = 0 IRON
+  // TIM4 Dimmer
+
+  // Start ADC
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcBuffer, 2);	// Start ADC in DMA
 
   // Init Flash
   W25qxx_Init();
@@ -163,24 +165,26 @@ int main(void)
   Evt_InitQueue();
   KeyboardInit(0x01);
 
-  target_iron = 0.0f;
-  target_air = 0.0f;
+  target_iron = 0;
+  target_air = 0;
+  target_speed = 0;
   flag_iron = 0;
   flag_air = 0;
 
-  AIRTEMP_TABLE_Interpolation();
-  IRON_TABLE_Interpolation();
-
   ILI9341_Init();
   ILI9341_Set_Address(0, 0, ILI9341_SCREEN_WIDTH-1, ILI9341_SCREEN_HEIGHT-1);
+  ILI9341_Set_Rotation(1);
   ILI9341_Fill_Screen(0x0000);
-  ILI9341_Set_Rotation(3);
+
+  AIRTEMP_TABLE_Interpolation();
+  IRON_TABLE_Interpolation();
 
   lv_init();
 
   static lv_disp_draw_buf_t draw_buf;
   static lv_color_t buf1[(320 * 10)];                        		// Declare a buffer for 1/10 screen size
-  lv_disp_draw_buf_init(&draw_buf, buf1, NULL, (320 * 10) );		// Initialize the display buffer.
+  static lv_color_t buf2[(320 * 10)];                        		// Declare a buffer for 1/10 screen size
+  lv_disp_draw_buf_init(&draw_buf, buf1, buf2, (320 * 10) );		// Initialize the display buffer.
 
   static lv_disp_drv_t disp_drv;        // Descriptor of a display driver
   lv_disp_drv_init(&disp_drv);          // Basic initialization
@@ -189,15 +193,17 @@ int main(void)
   disp_drv.draw_buf = &draw_buf;        // Assign the buffer to the display
   disp_drv.hor_res = 320;   			// Set the horizontal resolution of the display
   disp_drv.ver_res = 240;   			// Set the vertical resolution of the display
+  disp_drv.rotated    = LV_DISP_ROT_90;
+  disp_drv.sw_rotate  = 1;
   lv_disp_drv_register(&disp_drv);      // Finally register the driver
 
-  Tela_Principal = lv_obj_create(NULL);
+/*  Tela_Principal = lv_obj_create(NULL);
   lv_obj_clear_flag(Tela_Principal, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
   lv_obj_set_style_bg_color(Tela_Principal, lv_color_hex(0x000000), 0);
   lv_obj_set_style_bg_grad_color(Tela_Principal, lv_color_hex(0x000000), 0);
   //
   Text_Header = lv_label_create(Tela_Principal);
-  lv_obj_set_style_text_font(Text_Header, &lv_font_montserrat_30, LV_PART_MAIN | LV_STATE_DEFAULT);
+  lv_obj_set_style_text_font(Text_Header, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
   lv_obj_set_style_text_color(Text_Header, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
   lv_obj_set_style_text_opa(Text_Header, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
   lv_obj_set_style_text_letter_space(Text_Header, 1, 0);
@@ -205,13 +211,13 @@ int main(void)
 
   lv_label_set_long_mode(Text_Header, LV_LABEL_LONG_WRAP);               // Break the long lines
   lv_label_set_recolor(Text_Header, true);                               // Enable re-coloring by commands in the text
-  lv_label_set_text(Text_Header, "TFT LVGL STM32-F411 320x240");
+  lv_label_set_text(Text_Header, "TFT LVGL STM32-F411 240x320");
   lv_obj_center(Text_Header);
 
   lv_scr_load(Tela_Principal);
-
+*/
   //screen_main();
-  //screen_debug();
+  screen_debug();
 
   /* USER CODE END 2 */
 
@@ -243,9 +249,9 @@ int main(void)
 	  KeyboardEvent();
 
 	  // Read ADC
-	  ADC_iron = read_adc_ch(ADC_CHANNEL_8);
-	  ADC_air = read_adc_ch(ADC_CHANNEL_9);
-	  ADC_MeasurementCorrection();
+	  adc_ch8 = ADC_iron * ((float)3300.0/4095.0);
+	  adc_ch9 = ADC_air * ((float)3300.0/4095.0);
+	  //ADC_MeasurementCorrection();
 
 	  if(HAL_GetTick() - timer_led1 > 100) {
 		  timer_led1 = HAL_GetTick();
@@ -361,6 +367,12 @@ void debounce_input(void)
 			sw_iron = 1;
 		}
 	}
+}
+
+void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
+{
+	ADC_iron = (uint32_t)adcBuffer[0];
+	ADC_air  = (uint32_t)adcBuffer[1];
 }
 /* USER CODE END 4 */
 

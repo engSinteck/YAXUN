@@ -8,85 +8,91 @@
 #ifndef TAB_TEMP_H_
 #define TAB_TEMP_H_
 
-extern float temp_iron, temp_air;
+#include "main.h"
+#include "string.h"
+#include "stdio.h"
+
 extern uint32_t ADC_iron, ADC_air;
 
+uint32_t temp_iron;
+uint32_t temp_air;
+
 //Table autogenerator driver power
-#define AIRTEMP_POW_TABLE_EXPAND_COEF       20
+#define AIRTEMP_POW_TABLE_EXPAND_COEF       10
 #define AIRTEMP_POW_TABLE_LENGTH            53
 #define AIRTEMP_POW_TABLE2_LENGTH           (AIRTEMP_POW_TABLE_LENGTH-1)*(AIRTEMP_POW_TABLE_EXPAND_COEF+1) //LENGTH OF INTERPOLATED VECTOR
 
 //Voltage Checking
-const float AIRTEMP_TABLE[AIRTEMP_POW_TABLE_LENGTH][2] = {
-   {    0.0,   0 } ,
-   {  120.0,  10 },
-   {  216.0,  20 },
-   {  294.0,  30 },
-   {  362.0,  40 },
-   {  418.0,  50 },
-   {  470.0,  60 },
-   {  520.0,  70 },
-   {  566.0,  80 },
-   {  610.0,  90 },	// 10
-   {  650.0, 100 },
-   {  688.0, 110 },
-   {  724.0, 120 },
-   {  760.0, 130 },
-   {  796.0, 140 },
-   {  832.0, 150 },
-   {  864.0, 160 },
-   {  892.0, 170 },
-   {  924.0, 180 },
-   {  954.0, 190 },	// 20
-   {  982.0, 200 },
-   { 1012.0, 210 },
-   { 1038.0, 220 },
-   { 1064.0, 230 },
-   { 1090.0, 240 },
-   { 1118.0, 250 },
-   { 1142.0, 260 },
-   { 1170.0, 270 },
-   { 1190.0, 280 },
-   { 1216.0, 290 },	// 30
-   { 1242.0, 300 },
-   { 1264.0, 310 },
-   { 1288.0, 320 },
-   { 1310.0, 330 },
-   { 1332.0, 340 },
-   { 1354.0, 350 },
-   { 1376.0, 360 },
-   { 1396.0, 370 },
-   { 1418.0, 380 },
-   { 1440.0, 390 },	// 40
-   { 1460.0, 400 },
-   { 1480.0, 410 },
-   { 1500.0, 420 },
-   { 1520.0, 430 },
-   { 1540.0, 440 },
-   { 1558.0, 450 },
-   { 1578.0, 460 },
-   { 1596.0, 470 },
-   { 1616.0, 480 },
-   { 1634.0, 490 },	// 50
-   { 1652.0, 500 },
-   { 1670.0, 510 },
-   { 1690.0, 520 }
+const uint32_t AIRTEMP_TABLE[AIRTEMP_POW_TABLE_LENGTH][2] = {
+   {    0,   0 },
+   {   20,  10 },
+   {   40,  20 },
+   {   60,  30 },
+   {   80,  40 },
+   {  100,  50 },
+   {  120,  60 },
+   {  140,  70 },
+   {  160,  80 },
+   {  180,  90 },	// 10
+   {  200, 100 },
+   {  220, 110 },
+   {  240, 120 },
+   {  260, 130 },
+   {  280, 140 },
+   {  300, 150 },
+   {  350, 160 },
+   {  400, 170 },
+   {  450, 180 },
+   {  500, 190 },	// 20
+   {  550, 200 },
+   {  600, 210 },
+   {  650, 220 },
+   {  700, 230 },
+   {  750, 240 },
+   {  800, 250 },
+   {  850, 260 },
+   {  900, 270 },
+   {  950, 280 },
+   { 1000, 290 },	// 30
+   { 1050, 300 },
+   { 1100, 310 },
+   { 1200, 320 },
+   { 1300, 330 },
+   { 1400, 340 },
+   { 1500, 350 },
+   { 1600, 360 },
+   { 1700, 370 },
+   { 1800, 380 },
+   { 1900, 390 },	// 40
+   { 2000, 400 },
+   { 2200, 410 },
+   { 2400, 420 },
+   { 2600, 430 },
+   { 2800, 440 },
+   { 3000, 450 },
+   { 3200, 460 },
+   { 3400, 470 },
+   { 3600, 480 },
+   { 3700, 490 },	// 50
+   { 3800, 500 },
+   { 3900, 510 },
+   { 4050, 520 }
 };
-float AIRTEMP_TABLE_2[AIRTEMP_POW_TABLE2_LENGTH][2]; //generated table
+uint32_t AIRTEMP_TABLE_2[AIRTEMP_POW_TABLE2_LENGTH][2]; //generated table
 
 void AIRTEMP_TABLE_Interpolation(void)
 {
-  uint32_t pwdTableIndex = 0; //Original table
-  uint32_t pwdTableIndex2 =0; //Interpolated table
+  uint32_t pwdTableIndex  =  0; //Original table
+  uint32_t pwdTableIndex2 = 0; //Interpolated table
+  uint32_t tableDelta[2];
 
   memset(AIRTEMP_TABLE_2, 0, sizeof(AIRTEMP_TABLE_2));
-  float tableDelta[2];
 
-  for(pwdTableIndex = 0; pwdTableIndex <= AIRTEMP_POW_TABLE_LENGTH -2; pwdTableIndex++){
-    tableDelta[0] = (float)(AIRTEMP_TABLE[pwdTableIndex+1][0] - AIRTEMP_TABLE[pwdTableIndex][0]) / (float)(AIRTEMP_POW_TABLE_EXPAND_COEF);
-    tableDelta[1] = (float)(AIRTEMP_TABLE[pwdTableIndex+1][1] - AIRTEMP_TABLE[pwdTableIndex][1]) / (float)(AIRTEMP_POW_TABLE_EXPAND_COEF);
+  for(pwdTableIndex = 0; pwdTableIndex <= AIRTEMP_POW_TABLE_LENGTH - 2; pwdTableIndex++){
+    tableDelta[0] = (uint32_t)(AIRTEMP_TABLE[pwdTableIndex+1][0] - AIRTEMP_TABLE[pwdTableIndex][0]) / (uint32_t)(AIRTEMP_POW_TABLE_EXPAND_COEF);
+    tableDelta[1] = (uint32_t)(AIRTEMP_TABLE[pwdTableIndex+1][1] - AIRTEMP_TABLE[pwdTableIndex][1]) / (uint32_t)(AIRTEMP_POW_TABLE_EXPAND_COEF);
 
-    for(pwdTableIndex2 = 0; pwdTableIndex2 <= AIRTEMP_POW_TABLE_EXPAND_COEF  -1   ; pwdTableIndex2++){
+    for(pwdTableIndex2 = 0; pwdTableIndex2 <= AIRTEMP_POW_TABLE_EXPAND_COEF - 1; pwdTableIndex2++){
 
     	AIRTEMP_TABLE_2[pwdTableIndex*AIRTEMP_POW_TABLE_EXPAND_COEF + pwdTableIndex2][0] = AIRTEMP_TABLE[pwdTableIndex][0] + pwdTableIndex2 * tableDelta[0];
     	AIRTEMP_TABLE_2[pwdTableIndex*AIRTEMP_POW_TABLE_EXPAND_COEF + pwdTableIndex2][1] = AIRTEMP_TABLE[pwdTableIndex][1] + pwdTableIndex2 * tableDelta[1];
@@ -97,81 +103,81 @@ void AIRTEMP_TABLE_Interpolation(void)
 }
 
 //Table autogenerator driver power
-#define IRON_POW_TABLE_EXPAND_COEF       20
+#define IRON_POW_TABLE_EXPAND_COEF       10
 #define IRON_POW_TABLE_LENGTH            53
 #define IRON_POW_TABLE2_LENGTH           (IRON_POW_TABLE_LENGTH-1)*(IRON_POW_TABLE_EXPAND_COEF+1) //LENGTH OF INTERPOLATED VECTOR
 
 //Voltage Checking
-const float IRON_TABLE[IRON_POW_TABLE_LENGTH][2] = {
-   {    0.0,   0 } ,
-   {  120.0,  10 },
-   {  216.0,  20 },
-   {  294.0,  30 },
-   {  362.0,  40 },
-   {  418.0,  50 },
-   {  470.0,  60 },
-   {  520.0,  70 },
-   {  566.0,  80 },
-   {  610.0,  90 },	// 10
-   {  650.0, 100 },
-   {  688.0, 110 },
-   {  724.0, 120 },
-   {  760.0, 130 },
-   {  796.0, 140 },
-   {  832.0, 150 },
-   {  864.0, 160 },
-   {  892.0, 170 },
-   {  924.0, 180 },
-   {  954.0, 190 },	// 20
-   {  982.0, 200 },
-   { 1012.0, 210 },
-   { 1038.0, 220 },
-   { 1064.0, 230 },
-   { 1090.0, 240 },
-   { 1118.0, 250 },
-   { 1142.0, 260 },
-   { 1170.0, 270 },
-   { 1190.0, 280 },
-   { 1216.0, 290 },	// 30
-   { 1242.0, 300 },
-   { 1264.0, 310 },
-   { 1288.0, 320 },
-   { 1310.0, 330 },
-   { 1332.0, 340 },
-   { 1354.0, 350 },
-   { 1376.0, 360 },
-   { 1396.0, 370 },
-   { 1418.0, 380 },
-   { 1440.0, 390 },	// 40
-   { 1460.0, 400 },
-   { 1480.0, 410 },
-   { 1500.0, 420 },
-   { 1520.0, 430 },
-   { 1540.0, 440 },
-   { 1558.0, 450 },
-   { 1578.0, 460 },
-   { 1596.0, 470 },
-   { 1616.0, 480 },
-   { 1634.0, 490 },	// 50
-   { 1652.0, 500 },
-   { 1670.0, 510 },
-   { 1690.0, 520 }
+const uint32_t IRON_TABLE[IRON_POW_TABLE_LENGTH][2] = {
+   {    0,   0 },
+   {   20,  10 },
+   {   40,  20 },
+   {   60,  30 },
+   {   80,  40 },
+   {  100,  50 },
+   {  120,  60 },
+   {  140,  70 },
+   {  160,  80 },
+   {  180,  90 },	// 10
+   {  200, 100 },
+   {  220, 110 },
+   {  240, 120 },
+   {  260, 130 },
+   {  280, 140 },
+   {  300, 150 },
+   {  350, 160 },
+   {  400, 170 },
+   {  450, 180 },
+   {  500, 190 },	// 20
+   {  550, 200 },
+   {  600, 210 },
+   {  650, 220 },
+   {  700, 230 },
+   {  750, 240 },
+   {  800, 250 },
+   {  850, 260 },
+   {  900, 270 },
+   {  950, 280 },
+   { 1000, 290 },	// 30
+   { 1050, 300 },
+   { 1100, 310 },
+   { 1200, 320 },
+   { 1300, 330 },
+   { 1400, 340 },
+   { 1500, 350 },
+   { 1600, 360 },
+   { 1700, 370 },
+   { 1800, 380 },
+   { 1900, 390 },	// 40
+   { 2000, 400 },
+   { 2200, 410 },
+   { 2400, 420 },
+   { 2600, 430 },
+   { 2800, 440 },
+   { 3000, 450 },
+   { 3200, 460 },
+   { 3400, 470 },
+   { 3600, 480 },
+   { 3700, 490 },	// 50
+   { 3800, 500 },
+   { 3900, 510 },
+   { 4050, 520 }
 };
-float IRON_TABLE_2[IRON_POW_TABLE2_LENGTH][2]; //generated table
+uint32_t IRON_TABLE_2[IRON_POW_TABLE2_LENGTH][2]; //generated table
 
 void IRON_TABLE_Interpolation(void)
 {
-  uint32_t pwdTableIndex = 0; //Original table
-  uint32_t pwdTableIndex2 =0; //Interpolated table
+  uint32_t pwdTableIndex  = 0; //Original table
+  uint32_t pwdTableIndex2 = 0; //Interpolated table
+  uint32_t tableDelta[2];
 
   memset(IRON_TABLE_2, 0, sizeof(IRON_TABLE_2));
-  float tableDelta[2];
 
-  for(pwdTableIndex = 0; pwdTableIndex <= IRON_POW_TABLE_LENGTH -2; pwdTableIndex++){
-    tableDelta[0] = (float)(IRON_TABLE[pwdTableIndex+1][0] - IRON_TABLE[pwdTableIndex][0]) / (float)(IRON_POW_TABLE_EXPAND_COEF);
-    tableDelta[1] = (float)(IRON_TABLE[pwdTableIndex+1][1] - IRON_TABLE[pwdTableIndex][1]) / (float)(IRON_POW_TABLE_EXPAND_COEF);
+  for(pwdTableIndex = 0; pwdTableIndex <= IRON_POW_TABLE_LENGTH - 2; pwdTableIndex++){
+    tableDelta[0] = (uint32_t)(IRON_TABLE[pwdTableIndex+1][0] - IRON_TABLE[pwdTableIndex][0]) / (uint32_t)(IRON_POW_TABLE_EXPAND_COEF);
+    tableDelta[1] = (uint32_t)(IRON_TABLE[pwdTableIndex+1][1] - IRON_TABLE[pwdTableIndex][1]) / (uint32_t)(IRON_POW_TABLE_EXPAND_COEF);
 
-    for(pwdTableIndex2 = 0; pwdTableIndex2 <= IRON_POW_TABLE_EXPAND_COEF  -1   ; pwdTableIndex2++){
+    for(pwdTableIndex2 = 0; pwdTableIndex2 <= IRON_POW_TABLE_EXPAND_COEF - 1; pwdTableIndex2++){
 
     	IRON_TABLE_2[pwdTableIndex*AIRTEMP_POW_TABLE_EXPAND_COEF + pwdTableIndex2][0] = IRON_TABLE[pwdTableIndex][0] + pwdTableIndex2 * tableDelta[0];
     	IRON_TABLE_2[pwdTableIndex*AIRTEMP_POW_TABLE_EXPAND_COEF + pwdTableIndex2][1] = IRON_TABLE[pwdTableIndex][1] + pwdTableIndex2 * tableDelta[1];
@@ -187,13 +193,13 @@ void ADC_MeasurementCorrection(void)
 
     //Approximate Iron temperature
     for (i = 0; i< IRON_POW_TABLE2_LENGTH; i++){
-    	if( ((float)ADC_iron * (float)(3300.0/4095.0) )  >= IRON_TABLE_2[i][0]) { 	//compare in millivolts
-            temp_iron = IRON_TABLE_2[i][1];
+    	if( ADC_iron >= IRON_TABLE_2[i][0]) { 				//compare in millivolts
+    		temp_iron = IRON_TABLE_2[i][1];
         }
     }
     //Approximate Air temperature
     for (i = 0; i< AIRTEMP_POW_TABLE2_LENGTH; i++){
-    	if( ((float)ADC_air * (float)(3300.0/4095.0) )  >= AIRTEMP_TABLE_2[i][0]) { 	//compare in millivolts
+    	if( ADC_air >= AIRTEMP_TABLE_2[i][0]) { 	//compare in millivolts
             temp_air = AIRTEMP_TABLE_2[i][1];
         }
     }
