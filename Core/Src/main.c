@@ -47,6 +47,10 @@ uint8_t buf_tft[320 * 10 * 2];
 //static lv_obj_t * Text_Header;
 
 uint32_t ADC_iron = 0, ADC_air = 0;
+uint32_t flt_adc_8[8] ={0};
+uint32_t flt_adc_9[8] ={0};
+uint32_t idx_flt = 0;
+uint32_t flt_flag = 0;
 uint32_t timer_led1 = 0, timer_led2 = 0, timer_led3 = 0, timer_led4 = 0;
 uint32_t timer_lvgl = 0;
 
@@ -75,7 +79,7 @@ uint32_t flag_iron, flag_air;
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+void filter_adc(void);
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -143,10 +147,12 @@ int main(void)
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
   HAL_TIM_PWM_Start(&htim9, TIM_CHANNEL_1);
-  __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, 0);		// PWM_CH1 = 0 IRON
+  __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, 10);		// PWM_CH1 = 10 IRON
   // TIM4 Dimmer
 
   // Start ADC
+  idx_flt = 0;
+  flt_flag = 0;
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcBuffer, 2);	// Start ADC in DMA
 
   // Init Flash
@@ -176,8 +182,8 @@ int main(void)
   ILI9341_Set_Rotation(1);
   ILI9341_Fill_Screen(0x0000);
 
-  AIRTEMP_TABLE_Interpolation();
   IRON_TABLE_Interpolation();
+  AIR_TABLE_Interpolation();
 
   lv_init();
 
@@ -249,9 +255,10 @@ int main(void)
 	  KeyboardEvent();
 
 	  // Read ADC
+	  filter_adc();
 	  adc_ch8 = ADC_iron * ((float)3300.0/4095.0);
 	  adc_ch9 = ADC_air * ((float)3300.0/4095.0);
-	  //ADC_MeasurementCorrection();
+	  ADC_MeasurementCorrection();
 
 	  if(HAL_GetTick() - timer_led1 > 100) {
 		  timer_led1 = HAL_GetTick();
@@ -371,8 +378,25 @@ void debounce_input(void)
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-	ADC_iron = (uint32_t)adcBuffer[0];
-	ADC_air  = (uint32_t)adcBuffer[1];
+	//ADC_iron = (uint32_t)adcBuffer[0];
+	//ADC_air  = (uint32_t)adcBuffer[1];
+
+	flt_adc_8[idx_flt] = (uint32_t)adcBuffer[0];
+	flt_adc_9[idx_flt] = (uint32_t)adcBuffer[1];
+	idx_flt++;
+	if(idx_flt >= 8) {
+		idx_flt = 0;
+		flt_flag = 1;
+	}
+}
+
+void filter_adc(void)
+{
+	if(flt_flag == 1) {
+		ADC_iron = ( ( flt_adc_8[0]+flt_adc_8[1]+flt_adc_8[2]+flt_adc_8[3]+flt_adc_8[4]+flt_adc_8[5]+flt_adc_8[6]+flt_adc_8[7] ) / 8 );
+		ADC_air  = ( ( flt_adc_9[0]+flt_adc_9[1]+flt_adc_9[2]+flt_adc_9[3]+flt_adc_9[4]+flt_adc_9[5]+flt_adc_9[6]+flt_adc_9[7] ) / 8 );
+		flt_flag = 0;
+	}
 }
 /* USER CODE END 4 */
 
