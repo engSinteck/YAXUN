@@ -422,7 +422,7 @@ void ILI9341_Draw_Vertical_Line(uint16_t X, uint16_t Y, uint16_t Height, uint16_
 
 void ILI9341_Flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p)
 {
-	uint16_t size;
+	int32_t size;
 
     size = ( ((area->x2 - area->x1) + 1)  * ((area->y2 - area->y1) + 1) );
     ILI9341_Set_Address(area->x1, area->y1, area->x2, area->y2);
@@ -430,12 +430,12 @@ void ILI9341_Flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t 
     HAL_GPIO_WritePin(LCD_DC_PORT, LCD_DC_PIN, GPIO_PIN_SET);
     HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_RESET);
 
-	for(uint16_t p = 0; p <= size-1; p++) {
+	for(int32_t p = 0; p <= (uint16_t)size-1; p++) {
 		buf_tft[p*2] = color_p->full >> 8;
 		buf_tft[(p*2)+1] = color_p->full;
 		color_p++;
 	}
-	HAL_SPI_Transmit(HSPI_INSTANCE, (uint8_t *)&buf_tft[0], ((size-1)*2), HAL_MAX_DELAY);
+	HAL_SPI_Transmit(HSPI_INSTANCE, (uint8_t *)&buf_tft[0], (uint16_t)((size-1)*2), HAL_MAX_DELAY);
 	HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_SET);
 
 	lv_disp_flush_ready(disp_drv);                  /* Tell you are ready with the flushing*/

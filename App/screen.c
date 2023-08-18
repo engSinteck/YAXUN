@@ -9,7 +9,7 @@
 #include "screen.h"
 #include "../lvgl/lvgl.h"
 
-LV_FONT_DECLARE(lv_font_7Seg_30);
+LV_FONT_DECLARE(lv_font_7Seg_48);
 
 extern uint32_t ADC_iron, ADC_air;
 extern volatile uint32_t enc1_cnt, enc1_dir, enc1_btn;
@@ -62,7 +62,7 @@ void screen_main(void)
 	create_air();
 
     static uint32_t user_data = 10;
-    task_yaxun = lv_timer_create(update_yaxun_screen, 100,  &user_data);
+    task_yaxun = lv_timer_create(update_yaxun_screen, 200,  &user_data);
 
 	lv_scr_load(Tela_Yaxun);
 }
@@ -81,7 +81,7 @@ void create_iron(void)
     lv_obj_set_pos(frame_iron, 1, 20);
     // Label Temperature IRON
     iron_temperature = lv_label_create(frame_iron);
-    lv_obj_set_style_text_font(iron_temperature, &lv_font_7Seg_30, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(iron_temperature, &lv_font_7Seg_48, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(iron_temperature, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(iron_temperature, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(iron_temperature, 1, 0);
@@ -128,7 +128,7 @@ void create_air(void)
     lv_obj_set_pos(frame_air, 1, 232);
     // Label Temperature Air
     air_temperature = lv_label_create(frame_air);
-    lv_obj_set_style_text_font(air_temperature, &lv_font_7Seg_30, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(air_temperature, &lv_font_7Seg_48, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(air_temperature, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(air_temperature, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(air_temperature, 1, 0);
