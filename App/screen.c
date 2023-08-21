@@ -381,6 +381,7 @@ void update_debug_screen(lv_timer_t * timer)
 	lv_label_set_text_fmt(label_sw_air,  "SW_AIR: %d",  sw_air);
 
 	lv_label_set_text_fmt(label_termopar, "%s", str_termopar);
+	lv_label_set_text_fmt(label_power, "Vcca: %0.3f  Vref %0.3f", vdda, vref);
 }
 
 
