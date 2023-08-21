@@ -58,7 +58,7 @@ uint32_t flt_adc_v[8] ={0};
 uint32_t idx_flt = 0;
 uint32_t flt_flag = 0;
 uint32_t timer_led1 = 0, timer_led2 = 0, timer_led3 = 0, timer_led4 = 0;
-uint32_t timer_lvgl = 0, timer_max = 0;
+uint32_t timer_lvgl = 0, timer_max = 0, timer_rtc = 0;
 
 GPIO_PinState pin_sw_air;
 uint8_t sw_air_low = 0;
@@ -89,6 +89,9 @@ extern _Bool TCF;
 char str_termopar[32] = {0};
 float vdda = 0; // Result of VDDA calculation
 float vref = 0; // Result of vref calculation
+
+RTC_TimeTypeDef RTC_Time = {0};
+RTC_DateTypeDef RTC_Date = {0};
 
 /* USER CODE END PTD */
 
@@ -258,6 +261,8 @@ int main(void)
 
 	  if(HAL_GetTick() - timer_max > 250) {
 		  timer_max = HAL_GetTick();
+		  //HAL_RTC_GetTime(&hrtc, &RTC_Time, RTC_FORMAT_BIN);
+		  //HAL_RTC_GetDate(&hrtc, &RTC_Date, RTC_FORMAT_BIN);
 		  temp_K = Max6675_Read_Temp();
 		  if(TCF == 0) {
 			  temperature_K = temp_K;
@@ -268,6 +273,11 @@ int main(void)
 		  }
 	  }
 
+	  if(HAL_GetTick() - timer_rtc > 1000) {
+		  timer_rtc = HAL_GetTick();
+		  HAL_RTC_GetTime(&hrtc, &RTC_Time, RTC_FORMAT_BIN);
+		  HAL_RTC_GetDate(&hrtc, &RTC_Date, RTC_FORMAT_BIN);
+	  }
 
 	  // Encoder 1
 	  enc1_cnt = htim1.Instance->CNT >> 2;
