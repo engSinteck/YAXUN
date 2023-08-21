@@ -11,6 +11,8 @@
 #include "key.h"
 
 extern volatile uint32_t enc1_btn, enc2_btn, enc3_btn;
+extern volatile uint32_t enc1_cnt, enc2_cnt;
+extern float target_iron, target_air;
 
 // Estrututa Botoes
 pushbtn bt[4];
@@ -336,6 +338,12 @@ void KeyboardEvent(void)
 				else if(event[2] == PBTN_LCLK) {
 				}
 				else if(event[2] == PBTN_DCLK) {
+					if(event[1] == 0) {
+						target_iron = (float)enc1_cnt;
+					}
+					if(event[1] == 1) {
+						target_air = (float)enc2_cnt;
+					}
 				}
 				else if(event[2] == PBTN_TCLK) {
 					//PushButton_SetMode(PUSHBTN_MODE_UDOWN, true);

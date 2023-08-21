@@ -1013,7 +1013,7 @@ void teste_spi_flash(void)
 
 void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
 {
-	if(hspi->Instance==SPI3) {
+	if(hspi->Instance==SPI1) {
 		rx_complete_SPI = 1;
 		wTransferState = TRANSFER_COMPLETE;
 	}
@@ -1021,14 +1021,14 @@ void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi)
 
 void HAL_SPI_ErrorCallback(SPI_HandleTypeDef *hspi)
 {
-	if(hspi->Instance==SPI3) {
+	if(hspi->Instance==SPI1) {
 		wTransferState = TRANSFER_ERROR;
 	}
 }
 
 void HAL_SPI_TxRxCpltCallback(SPI_HandleTypeDef *hspi)
 {
-	if(hspi->Instance==SPI3) {
+	if(hspi->Instance==SPI1) {
 		wTransferState = TRANSFER_COMPLETE;
 	}
 }

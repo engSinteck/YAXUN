@@ -85,8 +85,8 @@ void Error_Handler(void);
 #define ENC1_B_GPIO_Port GPIOA
 #define ENC1_A_Pin GPIO_PIN_9
 #define ENC1_A_GPIO_Port GPIOA
-#define SW_AIR_Pin GPIO_PIN_10
-#define SW_AIR_GPIO_Port GPIOA
+#define CS_MAX_Pin GPIO_PIN_10
+#define CS_MAX_GPIO_Port GPIOA
 #define ENC3_B_Pin GPIO_PIN_15
 #define ENC3_B_GPIO_Port GPIOA
 #define ENC3_A_Pin GPIO_PIN_3

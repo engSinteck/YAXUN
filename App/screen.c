@@ -17,10 +17,12 @@ extern volatile uint32_t enc2_cnt, enc2_dir, enc2_btn;
 extern volatile uint32_t enc3_cnt, enc3_dir, enc3_btn;
 extern uint32_t flag_iron, flag_air;
 extern volatile uint8_t sw_air, sw_iron;
-extern uint32_t target_iron, target_air, target_speed;
+extern uint32_t target_speed;
 extern uint32_t temp_iron, temp_air;
 extern float temperature_iron, temperature_air;
+extern float target_iron, target_air, temperature_K;
 extern uint16_t pwm_iron;
+extern char str_termopar[];
 
 static lv_obj_t * Tela_Yaxun;
 static lv_obj_t * iron_temperature;
@@ -46,6 +48,7 @@ static lv_obj_t * label_sw_air;
 static lv_obj_t * label_temp_iron;
 static lv_obj_t * label_temp_air;
 static lv_obj_t * label_pwm_iron;
+static lv_obj_t * label_termopar;
 static lv_timer_t * task_debug;
 
 void create_iron(void);
@@ -101,7 +104,7 @@ void create_iron(void)
     lv_obj_set_style_text_line_space(preset_iron, 1, 0);
     lv_label_set_long_mode(preset_iron, LV_LABEL_LONG_WRAP);          	// Break the long lines
     lv_label_set_recolor(preset_iron, true);                         	// Enable re-coloring by commands in the text
-	lv_label_set_text_fmt(preset_iron, "%d", 320);
+	lv_label_set_text_fmt(preset_iron, "%0.0f", target_iron);
     lv_obj_align_to(preset_iron, frame_iron, LV_ALIGN_TOP_LEFT, -12, -14);	// Align
     // Symbol IRON
     symbol_iron = lv_label_create(frame_iron);
@@ -148,7 +151,7 @@ void create_air(void)
     lv_obj_set_style_text_line_space(preset_air, 1, 0);
     lv_label_set_long_mode(preset_air, LV_LABEL_LONG_WRAP);          	// Break the long lines
     lv_label_set_recolor(preset_air, true);                         	// Enable re-coloring by commands in the text
-	lv_label_set_text_fmt(preset_air, "%d", 320);
+	lv_label_set_text_fmt(preset_air, "%0.0f", target_air);
     lv_obj_align_to(preset_air, frame_air, LV_ALIGN_TOP_LEFT, -12, -14);	// Align
     // Label Speed Air
     preset_speed = lv_label_create(frame_air);
@@ -178,7 +181,7 @@ void update_yaxun_screen(lv_timer_t * timer)
 {
 	// IRON
 	lv_label_set_text_fmt(iron_temperature, "%0.0f", temperature_iron);
-	lv_label_set_text_fmt(preset_iron, "%ld", target_iron);
+	lv_label_set_text_fmt(preset_iron, "%0.0f", target_iron);
 	if(flag_iron == 0) {
 		lv_label_set_text(symbol_iron, LV_SYMBOL_OK);
 	}
@@ -190,7 +193,7 @@ void update_yaxun_screen(lv_timer_t * timer)
 	}
 	// AIR
 	lv_label_set_text_fmt(air_temperature, "%0.0f", temperature_iron);
-	lv_label_set_text_fmt(preset_air, "%ld", target_air);
+	lv_label_set_text_fmt(preset_air, "%0.0f", target_air);
 	lv_label_set_text_fmt(preset_speed, "%ld", target_speed);
 	if(flag_air == 0) {
 		lv_label_set_text(symbol_air, LV_SYMBOL_OK);
@@ -331,6 +334,17 @@ void screen_debug(void)
 	lv_label_set_text_fmt(label_sw_air, "SW_AIR: %d", sw_air);
 	lv_obj_set_pos(label_sw_air, 10, 240);
 
+	label_termopar = lv_label_create(Tela_Debug);
+    lv_obj_set_style_text_font(label_termopar, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(label_termopar, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(label_termopar, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_letter_space(label_termopar, 1, 0);
+    lv_obj_set_style_text_line_space(label_termopar, 1, 0);
+    lv_label_set_long_mode(label_termopar, LV_LABEL_LONG_WRAP);          	// Break the long lines
+    lv_label_set_recolor(label_termopar, true);                         	// Enable re-coloring by commands in the text
+	lv_label_set_text_fmt(label_termopar, "%s", str_termopar);
+	lv_obj_set_pos(label_termopar, 10, 264);
+
     static uint32_t user_data = 10;
     task_debug = lv_timer_create(update_debug_screen, 250,  &user_data);
 
@@ -352,6 +366,8 @@ void update_debug_screen(lv_timer_t * timer)
 	lv_label_set_text_fmt(label_pwm_iron, "PWM_IRON: %d", pwm_iron);
 	lv_label_set_text_fmt(label_sw_iron, "SW_IRON: %d", sw_iron);
 	lv_label_set_text_fmt(label_sw_air,  "SW_AIR: %d",  sw_air);
+
+	lv_label_set_text_fmt(label_termopar, "%s", str_termopar);
 }
 
 

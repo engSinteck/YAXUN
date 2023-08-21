@@ -28,13 +28,17 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "string.h"
+#include "stdio.h"
 #include "../App/ILI9341.h"
+#include "../App/MAX6675.h"
 #include "../App/W25qxx.h"
 #include "../App/key.h"
 #include "../App/tab_temp.h"
 #include "../App/power_ctrl.h"
 #include "../lvgl/lvgl.h"
 #include "../App/screen.h"
+#include "../App/log_usb.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -52,7 +56,7 @@ uint32_t flt_adc_9[8] ={0};
 uint32_t idx_flt = 0;
 uint32_t flt_flag = 0;
 uint32_t timer_led1 = 0, timer_led2 = 0, timer_led3 = 0, timer_led4 = 0;
-uint32_t timer_lvgl = 0;
+uint32_t timer_lvgl = 0, timer_max = 0;
 
 GPIO_PinState pin_sw_air;
 uint8_t sw_air_low = 0;
@@ -72,10 +76,15 @@ volatile uint32_t enc1_cnt=0, enc1_dir=0, enc1_btn=0;
 volatile uint32_t enc2_cnt=0, enc2_dir=0, enc2_btn=0;
 volatile uint32_t enc3_cnt=0, enc3_dir=0, enc3_btn=0;
 
-uint32_t target_iron, target_air, target_speed;
+uint32_t target_speed;
+float target_iron, target_air;
 uint32_t flag_iron, flag_air;
 
 uint16_t pwm_iron = 0;
+float temperature_K, temp_K;
+
+extern _Bool TCF;
+char str_termopar[32] = {0};
 
 /* USER CODE END PTD */
 
@@ -175,8 +184,8 @@ int main(void)
   Evt_InitQueue();
   KeyboardInit(0x01);
 
-  target_iron = 0;
-  target_air = 0;
+  target_iron = 0.0f;
+  target_air = 0.0f;
   target_speed = 0;
   flag_iron = 0;
   flag_air = 0;
@@ -242,6 +251,19 @@ int main(void)
 		  timer_lvgl = HAL_GetTick();
 		  lv_timer_handler();
 	  }
+
+	  if(HAL_GetTick() - timer_max > 250) {
+		  timer_max = HAL_GetTick();
+		  temp_K = Max6675_Read_Temp();
+		  if(TCF == 0) {
+			  temperature_K = temp_K;
+			  sprintf(str_termopar, "Temp(K): %0.2f°C", temperature_K);
+		  }
+		  else {
+			  sprintf(str_termopar, "Not Connected");
+		  }
+	  }
+
 
 	  // Encoder 1
 	  enc1_cnt = htim1.Instance->CNT >> 2;
@@ -327,6 +349,7 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+/*
 void debounce_input(void)
 {
 	// Debounce SW_AIR PIN
@@ -367,6 +390,7 @@ void debounce_input(void)
 		}
 	}
 }
+*/
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
@@ -410,7 +434,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
   /* USER CODE BEGIN Callback 1 */
   if (htim->Instance == TIM11) {
-	  debounce_input();
+	  //debounce_input();
 	  lv_tick_inc(1);
 	  timer_key++;
 	  if(timer_key >= PUSHBTN_TMR_PERIOD) {
