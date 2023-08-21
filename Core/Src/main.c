@@ -72,7 +72,7 @@ volatile uint8_t sw_iron = 0;
 
 volatile uint32_t timer_key = 0;
 
-double adc_ch8, adc_ch9;
+float adc_ch8, adc_ch9;
 
 volatile uint32_t enc1_cnt=0, enc1_dir=0, enc1_btn=0;
 volatile uint32_t enc2_cnt=0, enc2_dir=0, enc2_btn=0;
