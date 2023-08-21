@@ -75,6 +75,8 @@ volatile uint32_t enc3_cnt=0, enc3_dir=0, enc3_btn=0;
 uint32_t target_iron, target_air, target_speed;
 uint32_t flag_iron, flag_air;
 
+uint16_t pwm_iron = 0;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -147,7 +149,8 @@ int main(void)
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
   HAL_TIM_PWM_Start(&htim9, TIM_CHANNEL_1);
-  __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, 10);		// PWM_CH1 = 10 IRON
+  pwm_iron = 10;
+  __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);		// PWM_CH1 = 0 IRON
   // TIM4 Dimmer
 
   // Start ADC
@@ -163,10 +166,11 @@ int main(void)
   // LED-2 - REPOUSO
   // LED-3 - OPERATE
   // LED-4 - HEATER IRON
-  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(RELAY_GPIO_Port,RELAY_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LED3_GPIO_Port, LED3_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(LED4_GPIO_Port, LED4_Pin, GPIO_PIN_SET);
 
   Evt_InitQueue();
   KeyboardInit(0x01);
@@ -240,16 +244,21 @@ int main(void)
 	  }
 
 	  // Encoder 1
-	  enc1_cnt = htim1.Instance->CNT;
+	  enc1_cnt = htim1.Instance->CNT >> 2;
 	  enc1_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim1));
 
+//	  if(enc1_cnt != pwm_iron) {
+//		  pwm_iron = (uint16_t) enc1_cnt;
+//		  __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);	// PWM_CH1 = 0 IRON
+//	  }
+
 	  // Encoder 2
-	  enc2_cnt = htim2.Instance->CNT;
-	  enc2_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim2));
+	  enc2_cnt = htim3.Instance->CNT >> 2;
+	  enc2_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3));
 
 	  // Encoder 3
-	  enc3_cnt = htim3.Instance->CNT;
-	  enc3_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3));
+	  enc3_cnt = htim2.Instance->CNT >> 2;
+	  enc3_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim2));
 
 	  // Buttons Encoders
 	  KeyboardEvent();
@@ -259,23 +268,6 @@ int main(void)
 	  adc_ch8 = ADC_iron * ((float)3300.0/4095.0);
 	  adc_ch9 = ADC_air * ((float)3300.0/4095.0);
 	  ADC_MeasurementCorrection();
-
-	  if(HAL_GetTick() - timer_led1 > 100) {
-		  timer_led1 = HAL_GetTick();
-		  HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
-	  }
-	  if(HAL_GetTick() - timer_led2 > 150) {
-		  timer_led2 = HAL_GetTick();
-		  HAL_GPIO_TogglePin(LED2_GPIO_Port, LED2_Pin);
-	  }
-	  if(HAL_GetTick() - timer_led3 > 200) {
-		  timer_led3 = HAL_GetTick();
-		  HAL_GPIO_TogglePin(LED3_GPIO_Port, LED3_Pin);
-	  }
-	  if(HAL_GetTick() - timer_led4 > 250) {
-		  timer_led4 = HAL_GetTick();
-		  HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin);
-	  }
 
 	  // Controle de Temperatura
 //	  control_temperature_iron();

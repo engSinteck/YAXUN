@@ -20,6 +20,7 @@ extern volatile uint8_t sw_air, sw_iron;
 extern uint32_t target_iron, target_air, target_speed;
 extern uint32_t temp_iron, temp_air;
 extern float temperature_iron, temperature_air;
+extern uint16_t pwm_iron;
 
 static lv_obj_t * Tela_Yaxun;
 static lv_obj_t * iron_temperature;
@@ -44,6 +45,7 @@ static lv_obj_t * label_sw_iron;
 static lv_obj_t * label_sw_air;
 static lv_obj_t * label_temp_iron;
 static lv_obj_t * label_temp_air;
+static lv_obj_t * label_pwm_iron;
 static lv_timer_t * task_debug;
 
 void create_iron(void);
@@ -296,6 +298,17 @@ void screen_debug(void)
     lv_label_set_text_fmt(label_temp_air, "AIR °C: %0.1f", temperature_air);
 	lv_obj_set_pos(label_temp_air, 10, 168);
 
+	label_pwm_iron = lv_label_create(Tela_Debug);
+	lv_obj_set_style_text_font(label_pwm_iron, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(label_pwm_iron, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_text_opa(label_pwm_iron, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_text_letter_space(label_pwm_iron, 1, 0);
+	lv_obj_set_style_text_line_space(label_pwm_iron, 1, 0);
+	lv_label_set_long_mode(label_pwm_iron, LV_LABEL_LONG_WRAP);          	// Break the long lines
+	lv_label_set_recolor(label_pwm_iron, true);                         	// Enable re-coloring by commands in the text
+	lv_label_set_text_fmt(label_pwm_iron, "PWM_IRON: %d", pwm_iron);
+	lv_obj_set_pos(label_pwm_iron, 10, 192);
+
 	label_sw_iron = lv_label_create(Tela_Debug);
     lv_obj_set_style_text_font(label_sw_iron, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(label_sw_iron, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -305,7 +318,7 @@ void screen_debug(void)
     lv_label_set_long_mode(label_sw_iron, LV_LABEL_LONG_WRAP);          	// Break the long lines
     lv_label_set_recolor(label_sw_iron, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(label_sw_iron, "SW_IRON: %d", sw_iron);
-	lv_obj_set_pos(label_sw_iron, 10, 192);
+	lv_obj_set_pos(label_sw_iron, 10, 216);
 
 	label_sw_air = lv_label_create(Tela_Debug);
     lv_obj_set_style_text_font(label_sw_air, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -316,7 +329,7 @@ void screen_debug(void)
     lv_label_set_long_mode(label_sw_air, LV_LABEL_LONG_WRAP);          	// Break the long lines
     lv_label_set_recolor(label_sw_air, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(label_sw_air, "SW_AIR: %d", sw_air);
-	lv_obj_set_pos(label_sw_air, 10, 216);
+	lv_obj_set_pos(label_sw_air, 10, 240);
 
     static uint32_t user_data = 10;
     task_debug = lv_timer_create(update_debug_screen, 250,  &user_data);
@@ -336,6 +349,7 @@ void update_debug_screen(lv_timer_t * timer)
 	lv_label_set_text_fmt(enc_2, "ENC2 - %ld  Dir: %ld Btn: %ld", enc2_cnt, enc2_dir, enc2_btn);
 	lv_label_set_text_fmt(enc_3, "ENC3 - %ld  Dir: %ld Btn: %ld", enc3_cnt, enc3_dir, enc3_btn);
 
+	lv_label_set_text_fmt(label_pwm_iron, "PWM_IRON: %d", pwm_iron);
 	lv_label_set_text_fmt(label_sw_iron, "SW_IRON: %d", sw_iron);
 	lv_label_set_text_fmt(label_sw_air,  "SW_AIR: %d",  sw_air);
 }

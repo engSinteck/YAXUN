@@ -11,9 +11,10 @@
 
 extern uint32_t flag_iron, flag_air;
 extern uint32_t temp_iron, target_iron, temp_air, target_air;
+extern uint16_t pwm_iron;
 
 uint32_t timer_iron = 0, timer_air = 0, timer_speed = 0;
-uint16_t pwm_iron = 0, pwm_air = 0, pwm_speed = 0;
+uint16_t pwm_air = 0, pwm_speed = 0;
 
 void control_temperature_iron(void)
 {

@@ -430,6 +430,8 @@ void ILI9341_Flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t 
     HAL_GPIO_WritePin(LCD_DC_PORT, LCD_DC_PIN, GPIO_PIN_SET);
     HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_RESET);
 
+    //HAL_SPI_Transmit(HSPI_INSTANCE, (uint8_t *)&color_p, (uint16_t)((size-1)*2), HAL_MAX_DELAY);
+
 	for(int32_t p = 0; p <= (uint16_t)size-1; p++) {
 		buf_tft[p*2] = color_p->full >> 8;
 		buf_tft[(p*2)+1] = color_p->full;
