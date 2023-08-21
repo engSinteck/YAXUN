@@ -89,6 +89,7 @@ extern _Bool TCF;
 char str_termopar[32] = {0};
 float vdda = 0; // Result of VDDA calculation
 float vref = 0; // Result of vref calculation
+float temp_stm, ta, tb; // transfer function using calibration data
 
 RTC_TimeTypeDef RTC_Time = {0};
 RTC_DateTypeDef RTC_Date = {0};
@@ -98,6 +99,7 @@ RTC_DateTypeDef RTC_Date = {0};
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 void filter_adc(void);
+void calculate_calibration(void);
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -172,6 +174,7 @@ int main(void)
   // Start ADC
   idx_flt = 0;
   flt_flag = 0;
+  calculate_calibration();
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcBuffer, 4);	// Start ADC in DMA
 
   // Init Flash
@@ -436,8 +439,22 @@ void filter_adc(void)
 	    // Knowing vdda and the resolution of adc - the actual voltage can be calculated
 	    vref = (float) vdda / 4095 * ADC_vref;
 
+	    temp_stm = (float) (ta * (float) (ADC_temp) + tb);
 		flt_flag = 0;
 	}
+}
+
+void calculate_calibration(void)
+{
+    float x1 = (float) *TEMPSENSOR_CAL1_ADDR;
+    float x2 = (float) *TEMPSENSOR_CAL2_ADDR;
+    float y1 = (float) TEMPSENSOR_CAL1_TEMP;
+    float y2 = (float) TEMPSENSOR_CAL2_TEMP;
+
+    // Simple linear equation y = ax + b based on two points
+    ta = (float) ((y2 - y1) / (x2 - x1));
+    tb = (float) ((x2 * y1 - x1 * y2) / (x2 - x1));
+
 }
 /* USER CODE END 4 */
 
