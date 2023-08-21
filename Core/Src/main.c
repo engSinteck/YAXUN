@@ -260,7 +260,7 @@ int main(void)
 			  sprintf(str_termopar, "Temp(K): %0.2f°C", temperature_K);
 		  }
 		  else {
-			  sprintf(str_termopar, "Not Connected");
+			  sprintf(str_termopar, "Temp(K): Not Connected");
 		  }
 	  }
 
@@ -269,10 +269,10 @@ int main(void)
 	  enc1_cnt = htim1.Instance->CNT >> 2;
 	  enc1_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim1));
 
-//	  if(enc1_cnt != pwm_iron) {
-//		  pwm_iron = (uint16_t) enc1_cnt;
-//		  __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);	// PWM_CH1 = 0 IRON
-//	  }
+	  if(enc1_cnt != pwm_iron) {
+		  pwm_iron = (uint16_t) enc1_cnt;
+		  __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);	// PWM_CH1 = 0 IRON
+	  }
 
 	  // Encoder 2
 	  enc2_cnt = htim3.Instance->CNT >> 2;
