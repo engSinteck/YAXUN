@@ -23,6 +23,7 @@ extern float temperature_iron, temperature_air;
 extern float target_iron, target_air, temperature_K;
 extern uint16_t pwm_iron;
 extern char str_termopar[];
+extern float vdda, vref;
 
 static lv_obj_t * Tela_Yaxun;
 static lv_obj_t * iron_temperature;
@@ -49,6 +50,7 @@ static lv_obj_t * label_temp_iron;
 static lv_obj_t * label_temp_air;
 static lv_obj_t * label_pwm_iron;
 static lv_obj_t * label_termopar;
+static lv_obj_t * label_power;
 static lv_timer_t * task_debug;
 
 void create_iron(void);
@@ -344,6 +346,17 @@ void screen_debug(void)
     lv_label_set_recolor(label_termopar, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(label_termopar, "%s", str_termopar);
 	lv_obj_set_pos(label_termopar, 10, 264);
+
+	label_power = lv_label_create(Tela_Debug);
+	lv_obj_set_style_text_font(label_power, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_text_color(label_power, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_text_opa(label_power, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
+	lv_obj_set_style_text_letter_space(label_power, 1, 0);
+	lv_obj_set_style_text_line_space(label_power, 1, 0);
+	lv_label_set_long_mode(label_power, LV_LABEL_LONG_WRAP);          	// Break the long lines
+	lv_label_set_recolor(label_power, true);                         	// Enable re-coloring by commands in the text
+	lv_label_set_text_fmt(label_power, "Vcca: %0.2f  Vref %0.2f", vdda, vref);
+	lv_obj_set_pos(label_power, 10, 288);
 
     static uint32_t user_data = 10;
     task_debug = lv_timer_create(update_debug_screen, 250,  &user_data);

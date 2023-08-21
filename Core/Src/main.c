@@ -45,14 +45,16 @@
 /* USER CODE BEGIN PTD */
 #define DEBOUNCE_SW 	50
 
-uint16_t adcBuffer[2]; 					// Buffer ADC conversion
+uint16_t adcBuffer[4]; 					// Buffer ADC conversion
 uint8_t buf_tft[320 * 10 * 2];
 //static lv_obj_t * Tela_Principal;
 //static lv_obj_t * Text_Header;
 
-uint32_t ADC_iron = 0, ADC_air = 0;
+uint32_t ADC_iron = 0, ADC_air = 0, ADC_temp = 0, ADC_vref = 0;
 uint32_t flt_adc_8[8] ={0};
 uint32_t flt_adc_9[8] ={0};
+uint32_t flt_adc_t[8] ={0};
+uint32_t flt_adc_v[8] ={0};
 uint32_t idx_flt = 0;
 uint32_t flt_flag = 0;
 uint32_t timer_led1 = 0, timer_led2 = 0, timer_led3 = 0, timer_led4 = 0;
@@ -85,6 +87,8 @@ float temperature_K, temp_K;
 
 extern _Bool TCF;
 char str_termopar[32] = {0};
+float vdda = 0; // Result of VDDA calculation
+float vref = 0; // Result of vref calculation
 
 /* USER CODE END PTD */
 
@@ -165,7 +169,7 @@ int main(void)
   // Start ADC
   idx_flt = 0;
   flt_flag = 0;
-  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcBuffer, 2);	// Start ADC in DMA
+  HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcBuffer, 4);	// Start ADC in DMA
 
   // Init Flash
   W25qxx_Init();
@@ -399,6 +403,8 @@ void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 
 	flt_adc_8[idx_flt] = (uint32_t)adcBuffer[0];
 	flt_adc_9[idx_flt] = (uint32_t)adcBuffer[1];
+	flt_adc_t[idx_flt] = (uint32_t)adcBuffer[2];
+	flt_adc_v[idx_flt] = (uint32_t)adcBuffer[3];
 	idx_flt++;
 	if(idx_flt >= 8) {
 		idx_flt = 0;
@@ -411,6 +417,15 @@ void filter_adc(void)
 	if(flt_flag == 1) {
 		ADC_iron = ( ( flt_adc_8[0]+flt_adc_8[1]+flt_adc_8[2]+flt_adc_8[3]+flt_adc_8[4]+flt_adc_8[5]+flt_adc_8[6]+flt_adc_8[7] ) / 8 );
 		ADC_air  = ( ( flt_adc_9[0]+flt_adc_9[1]+flt_adc_9[2]+flt_adc_9[3]+flt_adc_9[4]+flt_adc_9[5]+flt_adc_9[6]+flt_adc_9[7] ) / 8 );
+        ADC_temp = ( ( flt_adc_t[0]+flt_adc_t[1]+flt_adc_t[2]+flt_adc_t[3]+flt_adc_t[4]+flt_adc_t[5]+flt_adc_t[6]+flt_adc_t[7] ) / 8 );
+		ADC_vref = ( ( flt_adc_v[0]+flt_adc_v[1]+flt_adc_v[2]+flt_adc_v[3]+flt_adc_v[4]+flt_adc_v[5]+flt_adc_v[6]+flt_adc_v[7] ) / 8 );
+
+		// VDDA can be calculated based on the measured vref and the calibration data
+	    vdda = (float)VREFINT_CAL_VREF * (float)*VREFINT_CAL_ADDR / ADC_vref / 1000;
+
+	    // Knowing vdda and the resolution of adc - the actual voltage can be calculated
+	    vref = (float) vdda / 4095 * ADC_vref;
+
 		flt_flag = 0;
 	}
 }
