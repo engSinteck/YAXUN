@@ -9,9 +9,8 @@
 #include "tim.h"
 #include "power_ctrl.h"
 
-extern uint32_t flag_iron, flag_air;
-extern uint32_t temp_iron, target_iron, temp_air, target_air;
 extern uint16_t pwm_iron;
+extern float target_iron, target_air, temperature_iron , temperature_air;
 
 uint32_t timer_iron = 0, timer_air = 0, timer_speed = 0;
 uint16_t pwm_air = 0, pwm_speed = 0;
@@ -21,19 +20,17 @@ void control_temperature_iron(void)
 	if(HAL_GetTick() - timer_iron > 250) {
 		timer_iron = HAL_GetTick();
 		//
-		if(temp_iron > target_iron) {
+		if(temperature_iron > target_iron) {
 			if(pwm_iron >= 1) pwm_iron--;
-			__HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);	// PWM_CH1 = 0 IRON
-			flag_iron = 1;
+			__HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);	// PWM_CH1 IRON
 		}
-		else if(temp_iron < target_iron) {
+		else if(temperature_iron < target_iron) {
 			pwm_iron++;
 			if(pwm_iron > 4095) pwm_iron = 4095;
-			__HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);	// PWM_CH1 = 0 IRON
-			flag_iron = 2;
+			__HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);	// PWM_CH1 IRON
 		}
 		else {
-			flag_iron = 0;
+
 		}
 	}
 }
@@ -43,19 +40,14 @@ void control_temperature_air(void)
 	if(HAL_GetTick() - timer_air > 250) {
 		timer_air = HAL_GetTick();
 		//
-		if(temp_air > target_air) {
-			if(pwm_air >= 1) pwm_air--;
-			//__HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);	// PWM_CH1 = 0 IRON
-			flag_air = 1;
+		if(temperature_air > target_air) {
+
 		}
-		else if(temp_air < target_air) {
-			pwm_air++;
-			if(pwm_air > 4095) pwm_air = 4095;
-			//__HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);	// PWM_CH1 = 0 IRON
-			flag_iron = 2;
+		else if(temperature_air < target_air) {
+
 		}
 		else {
-			flag_iron = 0;
+
 		}
 	}
 }

@@ -34,6 +34,8 @@ static lv_obj_t * preset_iron;
 static lv_obj_t * preset_air;
 static lv_obj_t * preset_speed;
 static lv_obj_t * txt_pct;
+static lv_obj_t * txt_pwm;
+static lv_obj_t * bar_iron;
 static lv_obj_t * frame_iron;
 static lv_obj_t * frame_air;
 static lv_timer_t * task_yaxun;
@@ -108,6 +110,30 @@ void create_iron(void)
     lv_label_set_recolor(preset_iron, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(preset_iron, "%0.0f", target_iron);
     lv_obj_align_to(preset_iron, frame_iron, LV_ALIGN_TOP_LEFT, -10, -10);	// Align
+    // Label PWM
+    txt_pwm = lv_label_create(frame_iron);
+    lv_obj_set_style_text_font(txt_pwm, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(txt_pwm, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(txt_pwm, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_letter_space(txt_pwm, 1, 0);
+    lv_obj_set_style_text_line_space(txt_pwm, 1, 0);
+    lv_label_set_long_mode(txt_pwm, LV_LABEL_LONG_WRAP);          	// Break the long lines
+    lv_label_set_recolor(txt_pwm, true);                         	// Enable re-coloring by commands in the text
+	lv_label_set_text_fmt(txt_pwm, "%d", pwm_iron);
+    lv_obj_align_to(txt_pwm, frame_iron, LV_ALIGN_TOP_LEFT, -10, 40);	// Align
+    // Barra IRON
+    bar_iron = lv_bar_create(frame_iron);
+    lv_obj_set_style_radius(bar_iron, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(bar_iron, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_color(bar_iron, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_radius(bar_iron, 0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(bar_iron, lv_color_hex(0x00FF00), LV_PART_INDICATOR );
+    lv_obj_set_style_bg_grad_color(bar_iron, lv_color_hex(0x00FF00), LV_PART_INDICATOR);
+    lv_obj_set_size(bar_iron, 8, 70);
+    lv_bar_set_range(bar_iron, 0, 4095);
+    lv_bar_set_value(bar_iron, 0, LV_ANIM_OFF);
+    lv_obj_align_to(bar_iron, frame_iron, LV_ALIGN_TOP_RIGHT, 10, -10);	// Align
 }
 
 void create_air(void)
@@ -165,7 +191,7 @@ void create_air(void)
     lv_label_set_long_mode(txt_pct, LV_LABEL_LONG_WRAP);          	// Break the long lines
     lv_label_set_recolor(txt_pct, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text(txt_pct, "%");
-    lv_obj_align_to(txt_pct, preset_speed, LV_ALIGN_TOP_LEFT, 0, 0);	// Align
+    lv_obj_align_to(txt_pct, preset_speed, LV_ALIGN_TOP_LEFT, 44, 0);	// Align
 }
 
 void update_yaxun_screen(lv_timer_t * timer)
@@ -173,11 +199,20 @@ void update_yaxun_screen(lv_timer_t * timer)
 	// IRON
 	lv_label_set_text_fmt(iron_temperature, "%0.0f", temperature_iron);
 	lv_label_set_text_fmt(preset_iron, "%0.0f", target_iron);
+	lv_bar_set_value(bar_iron, (int32_t)pwm_iron, LV_ANIM_OFF);
+	lv_label_set_text_fmt(txt_pwm, "%d", pwm_iron);
 
 	// AIR
-	lv_label_set_text_fmt(air_temperature, "%0.0f", temperature_iron);
+	lv_label_set_text_fmt(air_temperature, "%0.0f", temperature_air);
 	lv_label_set_text_fmt(preset_air, "%0.0f", target_air);
 	lv_label_set_text_fmt(preset_speed, "%ld", target_speed);
+
+	if(target_speed == 100)
+		lv_obj_align_to(txt_pct, preset_speed, LV_ALIGN_TOP_LEFT, 44, 0);	// Align
+	else if(target_speed >= 10)
+		lv_obj_align_to(txt_pct, preset_speed, LV_ALIGN_TOP_LEFT, 30, 0);	// Align
+	else
+		lv_obj_align_to(txt_pct, preset_speed, LV_ALIGN_TOP_LEFT, 20, 0);	// Align
 }
 
 
