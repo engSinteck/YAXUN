@@ -6,13 +6,16 @@
  */
 
 #include "main.h"
+#include "key.h"
 #include "stdio.h"
 #include "string.h"
-#include "key.h"
+#include "screen.h"
 
 extern volatile uint32_t enc1_btn, enc2_btn, enc3_btn;
 extern volatile uint32_t enc1_cnt, enc2_cnt;
 extern float target_iron, target_air;
+
+uint8_t flag_screen = 0;
 
 // Estrututa Botoes
 pushbtn bt[4];
@@ -342,7 +345,15 @@ void KeyboardEvent(void)
 						target_iron = (float)enc1_cnt;
 					}
 					if(event[1] == 1) {
-						target_air = (float)enc2_cnt;
+						if(flag_screen == 1) {
+							flag_screen = 0;
+							load_screen(flag_screen);
+
+						}
+						else {
+							flag_screen = 1;
+							load_screen(flag_screen);
+						}
 					}
 				}
 				else if(event[2] == PBTN_TCLK) {

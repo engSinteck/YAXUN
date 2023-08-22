@@ -245,8 +245,9 @@ int main(void)
 
   lv_scr_load(Tela_Principal);
 */
-  //screen_main();
+  screen_main();
   screen_debug();
+  load_screen(0);
 
   /* USER CODE END 2 */
 
@@ -294,6 +295,10 @@ int main(void)
 	  // Encoder 2
 	  enc2_cnt = htim3.Instance->CNT >> 2;
 	  enc2_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3));
+
+	  if(enc2_cnt != FLOAT_TO_INT(target_iron)) {
+		  target_iron = (float)enc2_cnt;
+	  }
 
 	  // Encoder 3
 	  enc3_cnt = htim2.Instance->CNT >> 2;

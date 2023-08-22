@@ -9,7 +9,8 @@
 #include "screen.h"
 #include "../lvgl/lvgl.h"
 
-LV_FONT_DECLARE(lv_font_7Seg_48);
+LV_FONT_DECLARE(lv_font_7Seg_B64);
+LV_FONT_DECLARE(lv_font_7Seg_B16);
 
 extern uint32_t ADC_iron, ADC_air;
 extern volatile uint32_t enc1_cnt, enc1_dir, enc1_btn;
@@ -73,24 +74,24 @@ void screen_main(void)
     static uint32_t user_data = 10;
     task_yaxun = lv_timer_create(update_yaxun_screen, 200,  &user_data);
 
-	lv_scr_load(Tela_Yaxun);
+	//lv_scr_load(Tela_Yaxun);
 }
 
 void create_iron(void)
 {
 	// Desenha Frame Iron
 	frame_iron = lv_obj_create(Tela_Yaxun);
-    lv_obj_set_size(frame_iron, 236, 84);
+    lv_obj_set_size(frame_iron, 236, 80);
     lv_obj_set_style_radius(frame_iron, 2, 0);
     lv_obj_set_style_bg_color(frame_iron, lv_color_hex(0x0000FF), 0);
     lv_obj_set_style_bg_grad_color(frame_iron, lv_color_hex(0x0000FF), 0);
     lv_obj_set_style_border_color(frame_iron, lv_color_hex(0xAAA9AD), 0);
     lv_obj_set_style_bg_opa(frame_iron, LV_OPA_50, 0);
     lv_obj_clear_flag(frame_iron, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_pos(frame_iron, 1, 20);
+    lv_obj_set_pos(frame_iron, 1, 32);
     // Label Temperature IRON
     iron_temperature = lv_label_create(frame_iron);
-    lv_obj_set_style_text_font(iron_temperature, &lv_font_7Seg_48, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(iron_temperature, &lv_font_7Seg_B64, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(iron_temperature, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(iron_temperature, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(iron_temperature, 1, 0);
@@ -98,10 +99,10 @@ void create_iron(void)
     lv_label_set_long_mode(iron_temperature, LV_LABEL_LONG_WRAP);          	// Break the long lines
     lv_label_set_recolor(iron_temperature, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(iron_temperature, "%0.0f", temperature_iron);
-    lv_obj_align_to(iron_temperature, frame_iron, LV_ALIGN_CENTER, 0, 8);	// Align
+    lv_obj_align_to(iron_temperature, frame_iron, LV_ALIGN_CENTER, -40, 0);	// Align
     // Label Preset IRON
     preset_iron = lv_label_create(frame_iron);
-    lv_obj_set_style_text_font(preset_iron, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(preset_iron, &lv_font_7Seg_B16, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(preset_iron, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(preset_iron, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(preset_iron, 1, 0);
@@ -109,7 +110,7 @@ void create_iron(void)
     lv_label_set_long_mode(preset_iron, LV_LABEL_LONG_WRAP);          	// Break the long lines
     lv_label_set_recolor(preset_iron, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(preset_iron, "%0.0f", target_iron);
-    lv_obj_align_to(preset_iron, frame_iron, LV_ALIGN_TOP_LEFT, -12, -14);	// Align
+    lv_obj_align_to(preset_iron, frame_iron, LV_ALIGN_TOP_LEFT, -10, -10);	// Align
     // Symbol IRON
     symbol_iron = lv_label_create(frame_iron);
     lv_obj_set_style_text_font(symbol_iron, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -127,17 +128,17 @@ void create_air(void)
 {
 	// Desenha Frame Air
 	frame_air = lv_obj_create(Tela_Yaxun);
-    lv_obj_set_size(frame_air, 236, 84);
+    lv_obj_set_size(frame_air, 236, 80);
     lv_obj_set_style_radius(frame_air, 2, 0);
     lv_obj_set_style_bg_color(frame_air, lv_color_hex(0x0000FF), 0);
     lv_obj_set_style_bg_grad_color(frame_air, lv_color_hex(0x0000FF), 0);
     lv_obj_set_style_border_color(frame_air, lv_color_hex(0xAAA9AD), 0);
     lv_obj_set_style_bg_opa(frame_air, LV_OPA_50, 0);
     lv_obj_clear_flag(frame_air, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_pos(frame_air, 1, 232);
+    lv_obj_set_pos(frame_air, 1, 238);
     // Label Temperature Air
     air_temperature = lv_label_create(frame_air);
-    lv_obj_set_style_text_font(air_temperature, &lv_font_7Seg_48, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(air_temperature, &lv_font_7Seg_B64, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(air_temperature, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(air_temperature, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(air_temperature, 1, 0);
@@ -145,10 +146,10 @@ void create_air(void)
     lv_label_set_long_mode(air_temperature, LV_LABEL_LONG_WRAP);          	// Break the long lines
     lv_label_set_recolor(air_temperature, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(air_temperature, "%0.0f", temperature_air);
-    lv_obj_align_to(air_temperature, frame_air, LV_ALIGN_CENTER, 0, 8);		// Align
+    lv_obj_align_to(air_temperature, frame_air, LV_ALIGN_CENTER, -40, 0);		// Align
     // Label Preset Air
     preset_air = lv_label_create(frame_air);
-    lv_obj_set_style_text_font(preset_air, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(preset_air, &lv_font_7Seg_B16, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(preset_air, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(preset_air, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(preset_air, 1, 0);
@@ -156,10 +157,10 @@ void create_air(void)
     lv_label_set_long_mode(preset_air, LV_LABEL_LONG_WRAP);          	// Break the long lines
     lv_label_set_recolor(preset_air, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(preset_air, "%0.0f", target_air);
-    lv_obj_align_to(preset_air, frame_air, LV_ALIGN_TOP_LEFT, -12, -14);	// Align
+    lv_obj_align_to(preset_air, frame_air, LV_ALIGN_TOP_LEFT, -10, -10);	// Align
     // Label Speed Air
     preset_speed = lv_label_create(frame_air);
-    lv_obj_set_style_text_font(preset_speed, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(preset_speed, &lv_font_7Seg_B16, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(preset_speed, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(preset_speed, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(preset_speed, 1, 0);
@@ -167,7 +168,7 @@ void create_air(void)
     lv_label_set_long_mode(preset_speed, LV_LABEL_LONG_WRAP);          	// Break the long lines
     lv_label_set_recolor(preset_speed, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(preset_speed, "%ld", target_speed);
-    lv_obj_align_to(preset_speed, frame_air, LV_ALIGN_CENTER, 0, -30);	// Align
+    lv_obj_align_to(preset_speed, frame_air, LV_ALIGN_TOP_LEFT, -10, 40);	// Align
     // Symbol Air
     symbol_air = lv_label_create(frame_air);
     lv_obj_set_style_text_font(symbol_air, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -374,7 +375,7 @@ void screen_debug(void)
     static uint32_t user_data = 10;
     task_debug = lv_timer_create(update_debug_screen, 250,  &user_data);
 
-	lv_scr_load(Tela_Debug);
+	//lv_scr_load(Tela_Debug);
 }
 
 void update_debug_screen(lv_timer_t * timer)
@@ -397,4 +398,29 @@ void update_debug_screen(lv_timer_t * timer)
 	lv_label_set_text_fmt(label_power, "Vcca: %0.3f  Vref %0.3f", vdda, vref);
 	lv_label_set_text_fmt(label_clock, "Time: %02d.%02d.%02d\r\n",RTC_Time.Hours,RTC_Time.Minutes,RTC_Time.Seconds);
 
+}
+
+void load_screen(uint8_t value)
+{
+	if(value == 0) {
+		// Screen Debug
+		lv_scr_load(Tela_Debug);
+	}
+	else {
+		lv_scr_load(Tela_Yaxun);
+	}
+}
+
+void delete_screen_main(void)
+{
+	lv_timer_del(task_yaxun);
+	lv_obj_del(Tela_Yaxun);
+	screen_debug();
+}
+
+void delete_screen_debug(void)
+{
+	lv_timer_del(task_debug);
+	lv_obj_del(Tela_Debug);
+	screen_main();
 }

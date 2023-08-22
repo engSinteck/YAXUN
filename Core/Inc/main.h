@@ -105,7 +105,7 @@ void Error_Handler(void);
 #define LED2_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-
+#define FLOAT_TO_INT(x) ((x)>=0?(int)((x)+0.5):(int)((x)-0.5))
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

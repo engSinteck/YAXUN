@@ -10,5 +10,8 @@
 
 void screen_main(void);
 void screen_debug(void);
+void delete_screen_main(void);
+void delete_screen_debug(void);
+void load_screen(uint8_t value);
 
 #endif /* SCREEN_H_ */
