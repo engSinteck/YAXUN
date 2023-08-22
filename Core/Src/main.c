@@ -47,8 +47,6 @@
 
 uint16_t adcBuffer[4]; 					// Buffer ADC conversion
 uint8_t buf_tft[320 * 10 * 2];
-//static lv_obj_t * Tela_Principal;
-//static lv_obj_t * Text_Header;
 
 uint32_t ADC_iron = 0, ADC_air = 0, ADC_temp = 0, ADC_vref = 0;
 uint32_t flt_adc_8[8] ={0};
@@ -58,7 +56,7 @@ uint32_t flt_adc_v[8] ={0};
 uint32_t idx_flt = 0;
 uint32_t flt_flag = 0;
 uint32_t timer_led1 = 0, timer_led2 = 0, timer_led3 = 0, timer_led4 = 0;
-uint32_t timer_lvgl = 0, timer_max = 0, timer_rtc = 0;
+uint32_t timer_lvgl = 0, timer_max = 0, timer_rtc = 0, timer_debug = 0;
 
 GPIO_PinState pin_sw_air;
 uint8_t sw_air_low = 0;
@@ -100,6 +98,7 @@ RTC_DateTypeDef RTC_Date = {0};
 /* USER CODE BEGIN PD */
 void filter_adc(void);
 void calculate_calibration(void);
+uint32_t map_speed(uint32_t var, uint32_t x_min, uint32_t x_max, uint32_t y_min, uint32_t y_max);
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -167,7 +166,7 @@ int main(void)
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
   HAL_TIM_PWM_Start(&htim9, TIM_CHANNEL_1);
-  pwm_iron = 10;
+  pwm_iron = 0;
   __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);		// PWM_CH1 = 0 IRON
   // TIM4 Dimmer
 
@@ -226,25 +225,6 @@ int main(void)
   disp_drv.sw_rotate  = 1;
   lv_disp_drv_register(&disp_drv);      // Finally register the driver
 
-/*  Tela_Principal = lv_obj_create(NULL);
-  lv_obj_clear_flag(Tela_Principal, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_set_style_bg_color(Tela_Principal, lv_color_hex(0x000000), 0);
-  lv_obj_set_style_bg_grad_color(Tela_Principal, lv_color_hex(0x000000), 0);
-  //
-  Text_Header = lv_label_create(Tela_Principal);
-  lv_obj_set_style_text_font(Text_Header, &lv_font_montserrat_12, LV_PART_MAIN | LV_STATE_DEFAULT);
-  lv_obj_set_style_text_color(Text_Header, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-  lv_obj_set_style_text_opa(Text_Header, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
-  lv_obj_set_style_text_letter_space(Text_Header, 1, 0);
-  lv_obj_set_style_text_line_space(Text_Header, 1, 0);
-
-  lv_label_set_long_mode(Text_Header, LV_LABEL_LONG_WRAP);               // Break the long lines
-  lv_label_set_recolor(Text_Header, true);                               // Enable re-coloring by commands in the text
-  lv_label_set_text(Text_Header, "TFT LVGL STM32-F411 240x320");
-  lv_obj_center(Text_Header);
-
-  lv_scr_load(Tela_Principal);
-*/
   screen_main();
   screen_debug();
   load_screen(0);
@@ -263,10 +243,14 @@ int main(void)
 		  lv_timer_handler();
 	  }
 
+	  // Debug Serial Text
+	  if(HAL_GetTick() - timer_debug > 1000) {
+	  		timer_debug = HAL_GetTick();
+	  		Log_temp_iron();
+	  }
+
 	  if(HAL_GetTick() - timer_max > 250) {
 		  timer_max = HAL_GetTick();
-		  //HAL_RTC_GetTime(&hrtc, &RTC_Time, RTC_FORMAT_BIN);
-		  //HAL_RTC_GetDate(&hrtc, &RTC_Date, RTC_FORMAT_BIN);
 		  temp_K = Max6675_Read_Temp();
 		  if(TCF == 0) {
 			  temperature_K = temp_K;
@@ -292,6 +276,10 @@ int main(void)
 		  __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);	// PWM_CH1 = 0 IRON
 	  }
 
+	  if(enc1_cnt != target_speed) {
+		  target_speed = map_speed(enc1_cnt, 0, 4095, 0, 100);
+	  }
+
 	  // Encoder 2
 	  enc2_cnt = htim3.Instance->CNT >> 2;
 	  enc2_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3));
@@ -300,9 +288,17 @@ int main(void)
 		  target_iron = (float)enc2_cnt;
 	  }
 
+	  if(enc2_cnt != FLOAT_TO_INT(target_air)) {
+		  target_air = (float)enc2_cnt;
+	  }
+
 	  // Encoder 3
 	  enc3_cnt = htim2.Instance->CNT >> 2;
 	  enc3_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim2));
+
+	  //if(enc3_cnt != FLOAT_TO_INT(target_iron)) {
+	  //	  target_iron = (float)enc3_cnt;
+	  //}
 
 	  // Buttons Encoders
 	  KeyboardEvent();
@@ -460,6 +456,14 @@ void calculate_calibration(void)
     ta = (float) ((y2 - y1) / (x2 - x1));
     tb = (float) ((x2 * y1 - x1 * y2) / (x2 - x1));
 
+}
+
+uint32_t map_speed(uint32_t var, uint32_t x_min, uint32_t x_max, uint32_t y_min, uint32_t y_max)
+{
+	uint32_t value = var;
+
+	if(value >= x_max) value = x_max;
+	return (uint32_t)(value - x_min) * (y_max - y_min) / (x_max - x_min) + x_min;
 }
 /* USER CODE END 4 */
 

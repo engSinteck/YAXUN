@@ -16,5 +16,7 @@
 #include "usbd_cdc_if.h"
 
 void LogDebug(const char* fmt, ...);
+void Log_temp_iron(void);
+void Log_temp_gun(void);
 
 #endif /* LOG_USB_H_ */

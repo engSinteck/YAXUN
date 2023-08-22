@@ -5,19 +5,13 @@
  *      Author: rinaldo.santos
  */
 
-
-/*
- * ili9341.c
- *
- *  Created on: May 11, 2019
- *      Author: rinaldo
- */
-
 /* Includes ------------------------------------------------------------------*/
 #include "ILI9341.h"
 #include "string.h" // For memcpy
 #include "stdio.h"
 #include "main.h"
+
+unsigned char burst_buffer[BURST_MAX_SIZE];
 
 extern uint8_t buf_tft[];
 
@@ -77,9 +71,9 @@ void ILI9341_Set_Address(uint16_t X1, uint16_t Y1, uint16_t X2, uint16_t Y2)
 void ILI9341_Reset(void)
 {
 	HAL_GPIO_WritePin(LCD_RST_PORT, LCD_RST_PIN, GPIO_PIN_RESET);
-	HAL_Delay(200);
+	HAL_Delay(100);
 	HAL_GPIO_WritePin(LCD_RST_PORT, LCD_RST_PIN, GPIO_PIN_SET);
-	HAL_Delay(200);
+	HAL_Delay(100);
 }
 
 /*Ser rotation of the screen - changes x0 and y0*/
@@ -91,31 +85,31 @@ void ILI9341_Set_Rotation(uint8_t Rotation)
 	HAL_Delay(1);
 
 	switch(screen_rotation)
-		{
-			case SCREEN_VERTICAL_1:
-				ILI9341_Write_Data(0x40|0x08);
-				LCD_WIDTH = 240;
-				LCD_HEIGHT = 320;
-				break;
-			case SCREEN_HORIZONTAL_1:
-				ILI9341_Write_Data(0x20|0x08);
-				LCD_WIDTH  = 320;
-				LCD_HEIGHT = 240;
-				break;
-			case SCREEN_VERTICAL_2:
-				ILI9341_Write_Data(0x80|0x08);
-				LCD_WIDTH  = 240;
-				LCD_HEIGHT = 320;
-				break;
-			case SCREEN_HORIZONTAL_2:
-				ILI9341_Write_Data(0x40|0x80|0x20|0x08);
-				LCD_WIDTH  = 320;
-				LCD_HEIGHT = 240;
-				break;
-			default:
-				//EXIT IF SCREEN ROTATION NOT VALID!
-				break;
-		}
+	{
+		case SCREEN_VERTICAL_1:
+			ILI9341_Write_Data(0x40|0x08);
+			LCD_WIDTH = 240;
+			LCD_HEIGHT = 320;
+			break;
+		case SCREEN_HORIZONTAL_1:
+			ILI9341_Write_Data(0x20|0x08);
+			LCD_WIDTH  = 320;
+			LCD_HEIGHT = 240;
+			break;
+		case SCREEN_VERTICAL_2:
+			ILI9341_Write_Data(0x80|0x08);
+			LCD_WIDTH  = 240;
+			LCD_HEIGHT = 320;
+			break;
+		case SCREEN_HORIZONTAL_2:
+			ILI9341_Write_Data(0x40|0x80|0x20|0x08);
+			LCD_WIDTH  = 320;
+			LCD_HEIGHT = 240;
+			break;
+		default:
+			//EXIT IF SCREEN ROTATION NOT VALID!
+			break;
+	}
 }
 
 /*Enable LCD display*/
@@ -132,7 +126,7 @@ void ILI9341_Init(void)
 
 	//SOFTWARE RESET
 	ILI9341_Write_Command(0x01);
-	HAL_Delay(1000);
+	HAL_Delay(500);
 
 	//POWER CONTROL A
 	ILI9341_Write_Command(0xCB);
@@ -267,6 +261,7 @@ void ILI9341_Draw_Colour(uint16_t Colour)
 {
 	//SENDS COLOUR
 	unsigned char TempBuffer[2] = {Colour>>8, Colour};
+
 	HAL_GPIO_WritePin(LCD_DC_PORT, LCD_DC_PIN, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_RESET);
 	HAL_SPI_Transmit(HSPI_INSTANCE, TempBuffer, 2, 1);
@@ -279,6 +274,7 @@ void ILI9341_Draw_Colour_Burst(uint16_t Colour, uint32_t Size)
 {
 	//SENDS COLOUR
 	uint32_t Buffer_Size = 0;
+
 	if((Size*2) < BURST_MAX_SIZE)
 	{
 		Buffer_Size = Size;
@@ -292,7 +288,8 @@ void ILI9341_Draw_Colour_Burst(uint16_t Colour, uint32_t Size)
 	HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_RESET);
 
 	unsigned char chifted = 	Colour>>8;;
-	unsigned char burst_buffer[Buffer_Size];
+	//unsigned char burst_buffer[Buffer_Size];
+
 	for(uint32_t j = 0; j < Buffer_Size; j+=2)
 	{
 		burst_buffer[j] = 	chifted;
@@ -306,9 +303,9 @@ void ILI9341_Draw_Colour_Burst(uint16_t Colour, uint32_t Size)
 	if(Sending_in_Block != 0)
 	{
 		for(uint32_t j = 0; j < (Sending_in_Block); j++)
-			{
+		{
 			HAL_SPI_Transmit(HSPI_INSTANCE, (unsigned char *)burst_buffer, Buffer_Size, 10);
-			}
+		}
 	}
 
 	//REMAINDER!
@@ -430,9 +427,7 @@ void ILI9341_Flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t 
     HAL_GPIO_WritePin(LCD_DC_PORT, LCD_DC_PIN, GPIO_PIN_SET);
     HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_RESET);
 
-    //HAL_SPI_Transmit(HSPI_INSTANCE, (uint8_t *)&color_p, (uint16_t)((size-1)*2), HAL_MAX_DELAY);
-
-	for(int32_t p = 0; p <= (uint16_t)size-1; p++) {
+	for(int32_t p = 0; p <= (int32_t)size-1; p++) {
 		buf_tft[p*2] = color_p->full >> 8;
 		buf_tft[(p*2)+1] = color_p->full;
 		color_p++;

@@ -33,8 +33,7 @@ static lv_obj_t * air_temperature;
 static lv_obj_t * preset_iron;
 static lv_obj_t * preset_air;
 static lv_obj_t * preset_speed;
-static lv_obj_t * symbol_iron;
-static lv_obj_t * symbol_air;
+static lv_obj_t * txt_pct;
 static lv_obj_t * frame_iron;
 static lv_obj_t * frame_air;
 static lv_timer_t * task_yaxun;
@@ -73,8 +72,6 @@ void screen_main(void)
 
     static uint32_t user_data = 10;
     task_yaxun = lv_timer_create(update_yaxun_screen, 200,  &user_data);
-
-	//lv_scr_load(Tela_Yaxun);
 }
 
 void create_iron(void)
@@ -99,7 +96,7 @@ void create_iron(void)
     lv_label_set_long_mode(iron_temperature, LV_LABEL_LONG_WRAP);          	// Break the long lines
     lv_label_set_recolor(iron_temperature, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(iron_temperature, "%0.0f", temperature_iron);
-    lv_obj_align_to(iron_temperature, frame_iron, LV_ALIGN_CENTER, -40, 0);	// Align
+    lv_obj_align_to(iron_temperature, frame_iron, LV_ALIGN_CENTER, -32, 0);	// Align
     // Label Preset IRON
     preset_iron = lv_label_create(frame_iron);
     lv_obj_set_style_text_font(preset_iron, &lv_font_7Seg_B16, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -111,17 +108,6 @@ void create_iron(void)
     lv_label_set_recolor(preset_iron, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(preset_iron, "%0.0f", target_iron);
     lv_obj_align_to(preset_iron, frame_iron, LV_ALIGN_TOP_LEFT, -10, -10);	// Align
-    // Symbol IRON
-    symbol_iron = lv_label_create(frame_iron);
-    lv_obj_set_style_text_font(symbol_iron, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_color(symbol_iron, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(symbol_iron, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_letter_space(symbol_iron, 1, 0);
-    lv_obj_set_style_text_line_space(symbol_iron, 1, 0);
-    lv_label_set_long_mode(symbol_iron, LV_LABEL_LONG_WRAP);          	// Break the long lines
-    lv_label_set_recolor(symbol_iron, true);                         	// Enable re-coloring by commands in the text
-	lv_label_set_text(symbol_iron, LV_SYMBOL_OK);
-    lv_obj_align_to(symbol_iron, frame_iron, LV_ALIGN_TOP_RIGHT, 12, -14);	// Align
 }
 
 void create_air(void)
@@ -146,7 +132,7 @@ void create_air(void)
     lv_label_set_long_mode(air_temperature, LV_LABEL_LONG_WRAP);          	// Break the long lines
     lv_label_set_recolor(air_temperature, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(air_temperature, "%0.0f", temperature_air);
-    lv_obj_align_to(air_temperature, frame_air, LV_ALIGN_CENTER, -40, 0);		// Align
+    lv_obj_align_to(air_temperature, frame_air, LV_ALIGN_CENTER, -32, 0);		// Align
     // Label Preset Air
     preset_air = lv_label_create(frame_air);
     lv_obj_set_style_text_font(preset_air, &lv_font_7Seg_B16, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -169,17 +155,17 @@ void create_air(void)
     lv_label_set_recolor(preset_speed, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(preset_speed, "%ld", target_speed);
     lv_obj_align_to(preset_speed, frame_air, LV_ALIGN_TOP_LEFT, -10, 40);	// Align
-    // Symbol Air
-    symbol_air = lv_label_create(frame_air);
-    lv_obj_set_style_text_font(symbol_air, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_color(symbol_air, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_opa(symbol_air, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
-    lv_obj_set_style_text_letter_space(symbol_air, 1, 0);
-    lv_obj_set_style_text_line_space(symbol_air, 1, 0);
-    lv_label_set_long_mode(symbol_air, LV_LABEL_LONG_WRAP);          	// Break the long lines
-    lv_label_set_recolor(symbol_air, true);                         	// Enable re-coloring by commands in the text
-	lv_label_set_text(symbol_air, LV_SYMBOL_OK);
-    lv_obj_align_to(symbol_air, frame_air, LV_ALIGN_TOP_RIGHT, 12, -14);	// Align
+    //
+    txt_pct = lv_label_create(preset_speed);
+    lv_obj_set_style_text_font(txt_pct, &lv_font_montserrat_18, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(txt_pct, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_opa(txt_pct, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_letter_space(txt_pct, 1, 0);
+    lv_obj_set_style_text_line_space(txt_pct, 1, 0);
+    lv_label_set_long_mode(txt_pct, LV_LABEL_LONG_WRAP);          	// Break the long lines
+    lv_label_set_recolor(txt_pct, true);                         	// Enable re-coloring by commands in the text
+	lv_label_set_text(txt_pct, "%");
+    lv_obj_align_to(txt_pct, preset_speed, LV_ALIGN_TOP_LEFT, 0, 0);	// Align
 }
 
 void update_yaxun_screen(lv_timer_t * timer)
@@ -187,28 +173,11 @@ void update_yaxun_screen(lv_timer_t * timer)
 	// IRON
 	lv_label_set_text_fmt(iron_temperature, "%0.0f", temperature_iron);
 	lv_label_set_text_fmt(preset_iron, "%0.0f", target_iron);
-	if(flag_iron == 0) {
-		lv_label_set_text(symbol_iron, LV_SYMBOL_OK);
-	}
-	else if(flag_iron == 1) {
-		lv_label_set_text(symbol_iron, LV_SYMBOL_UP);
-	}
-	else {
-		lv_label_set_text(symbol_iron, LV_SYMBOL_DOWN);
-	}
+
 	// AIR
 	lv_label_set_text_fmt(air_temperature, "%0.0f", temperature_iron);
 	lv_label_set_text_fmt(preset_air, "%0.0f", target_air);
 	lv_label_set_text_fmt(preset_speed, "%ld", target_speed);
-	if(flag_air == 0) {
-		lv_label_set_text(symbol_air, LV_SYMBOL_OK);
-	}
-	else if(flag_iron == 1) {
-		lv_label_set_text(symbol_air, LV_SYMBOL_UP);
-	}
-	else {
-		lv_label_set_text(symbol_air, LV_SYMBOL_DOWN);
-	}
 }
 
 
@@ -369,13 +338,11 @@ void screen_debug(void)
 	lv_obj_set_style_text_line_space(label_clock, 1, 0);
 	lv_label_set_long_mode(label_clock, LV_LABEL_LONG_WRAP);          	// Break the long lines
 	lv_label_set_recolor(label_clock, true);                         	// Enable re-coloring by commands in the text
-	lv_label_set_text_fmt(label_clock, "Time: %02d.%02d.%02d\r\n",RTC_Time.Hours,RTC_Time.Minutes,RTC_Time.Seconds);
+	lv_label_set_text_fmt(label_clock, "Time: %02d:%02d:%02d",RTC_Time.Hours,RTC_Time.Minutes,RTC_Time.Seconds);
 	lv_obj_set_pos(label_clock, 10, 296);
 
     static uint32_t user_data = 10;
     task_debug = lv_timer_create(update_debug_screen, 250,  &user_data);
-
-	//lv_scr_load(Tela_Debug);
 }
 
 void update_debug_screen(lv_timer_t * timer)
@@ -396,14 +363,13 @@ void update_debug_screen(lv_timer_t * timer)
 
 	lv_label_set_text_fmt(label_termopar, "%s", str_termopar);
 	lv_label_set_text_fmt(label_power, "Vcca: %0.3f  Vref %0.3f", vdda, vref);
-	lv_label_set_text_fmt(label_clock, "Time: %02d.%02d.%02d\r\n",RTC_Time.Hours,RTC_Time.Minutes,RTC_Time.Seconds);
+	lv_label_set_text_fmt(label_clock, "Time: %02d:%02d:%02d",RTC_Time.Hours,RTC_Time.Minutes,RTC_Time.Seconds);
 
 }
 
 void load_screen(uint8_t value)
 {
 	if(value == 0) {
-		// Screen Debug
 		lv_scr_load(Tela_Debug);
 	}
 	else {
