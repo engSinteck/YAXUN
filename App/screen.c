@@ -11,6 +11,8 @@
 
 LV_FONT_DECLARE(lv_font_7Seg_B64);
 LV_FONT_DECLARE(lv_font_7Seg_B16);
+LV_IMG_DECLARE(iron);
+LV_IMG_DECLARE(airflow);
 
 extern uint32_t ADC_iron, ADC_air;
 extern volatile uint32_t enc1_cnt, enc1_dir, enc1_btn;
@@ -28,6 +30,8 @@ extern float vdda, vref;
 extern RTC_TimeTypeDef RTC_Time;
 
 static lv_obj_t * Tela_Yaxun;
+static lv_obj_t * img_iron;
+static lv_obj_t * img_air;
 static lv_obj_t * iron_temperature;
 static lv_obj_t * air_temperature;
 static lv_obj_t * preset_iron;
@@ -36,6 +40,7 @@ static lv_obj_t * preset_speed;
 static lv_obj_t * txt_pct;
 static lv_obj_t * txt_pwm;
 static lv_obj_t * bar_iron;
+static lv_obj_t * bar_air;
 static lv_obj_t * frame_iron;
 static lv_obj_t * frame_air;
 static lv_timer_t * task_yaxun;
@@ -66,8 +71,8 @@ void screen_main(void)
 {
 	Tela_Yaxun = lv_obj_create(NULL);
 	lv_obj_clear_flag(Tela_Yaxun, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
-	lv_obj_set_style_bg_color(Tela_Yaxun, lv_color_hex(0x000000), 0);
-	lv_obj_set_style_bg_grad_color(Tela_Yaxun, lv_color_hex(0x000000), 0);
+	lv_obj_set_style_bg_color(Tela_Yaxun, lv_color_hex(0x0000FF), 0);
+	lv_obj_set_style_bg_grad_color(Tela_Yaxun, lv_color_hex(0x0000FF), 0);
 
 	create_iron();
 	create_air();
@@ -82,13 +87,17 @@ void create_iron(void)
 	frame_iron = lv_obj_create(Tela_Yaxun);
     lv_obj_set_size(frame_iron, 236, 80);
     lv_obj_set_style_radius(frame_iron, 2, 0);
-    lv_obj_set_style_bg_color(frame_iron, lv_color_hex(0x0000FF), 0);
-    lv_obj_set_style_bg_grad_color(frame_iron, lv_color_hex(0x0000FF), 0);
+    lv_obj_set_style_bg_color(frame_iron, lv_color_hex(0x000000), 0);
+    lv_obj_set_style_bg_grad_color(frame_iron, lv_color_hex(0x000000), 0);
     lv_obj_set_style_border_color(frame_iron, lv_color_hex(0xAAA9AD), 0);
-    lv_obj_set_style_bg_opa(frame_iron, LV_OPA_50, 0);
+    lv_obj_set_style_bg_opa(frame_iron, LV_OPA_COVER, 0);
     lv_obj_clear_flag(frame_iron, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_pos(frame_iron, 1, 32);
-    // Label Temperature IRON
+    // Image IRON
+	img_iron = lv_img_create(frame_iron);
+	lv_img_set_src(img_iron, &iron);
+	lv_obj_align_to(img_iron, frame_iron, LV_ALIGN_TOP_LEFT, 0, 8);	// Align
+	// Label Temperature IRON
     iron_temperature = lv_label_create(frame_iron);
     lv_obj_set_style_text_font(iron_temperature, &lv_font_7Seg_B64, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(iron_temperature, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -142,12 +151,16 @@ void create_air(void)
 	frame_air = lv_obj_create(Tela_Yaxun);
     lv_obj_set_size(frame_air, 236, 80);
     lv_obj_set_style_radius(frame_air, 2, 0);
-    lv_obj_set_style_bg_color(frame_air, lv_color_hex(0x0000FF), 0);
-    lv_obj_set_style_bg_grad_color(frame_air, lv_color_hex(0x0000FF), 0);
+    lv_obj_set_style_bg_color(frame_air, lv_color_hex(0x000000), 0);
+    lv_obj_set_style_bg_grad_color(frame_air, lv_color_hex(0x000000), 0);
     lv_obj_set_style_border_color(frame_air, lv_color_hex(0xAAA9AD), 0);
-    lv_obj_set_style_bg_opa(frame_air, LV_OPA_50, 0);
+    lv_obj_set_style_bg_opa(frame_air, LV_OPA_COVER, 0);
     lv_obj_clear_flag(frame_air, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_pos(frame_air, 1, 238);
+    // Image AIR
+	img_air = lv_img_create(frame_air);
+	lv_img_set_src(img_air, &airflow);
+	lv_obj_align_to(img_air, frame_air, LV_ALIGN_TOP_LEFT, 0, 6);	// Align
     // Label Temperature Air
     air_temperature = lv_label_create(frame_air);
     lv_obj_set_style_text_font(air_temperature, &lv_font_7Seg_B64, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -192,6 +205,20 @@ void create_air(void)
     lv_label_set_recolor(txt_pct, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text(txt_pct, "%");
     lv_obj_align_to(txt_pct, preset_speed, LV_ALIGN_TOP_LEFT, 44, 0);	// Align
+
+    // Barra Air
+    bar_air = lv_bar_create(frame_air);
+    lv_obj_set_style_radius(bar_air, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(bar_air, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_grad_color(bar_air, lv_color_hex(0x808080), LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_obj_set_style_radius(bar_air, 0, LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(bar_air, lv_color_hex(0x00FF00), LV_PART_INDICATOR );
+    lv_obj_set_style_bg_grad_color(bar_air, lv_color_hex(0x00FF00), LV_PART_INDICATOR);
+    lv_obj_set_size(bar_air, 8, 70);
+    lv_bar_set_range(bar_air, 0, 100);
+    lv_bar_set_value(bar_air, 0, LV_ANIM_OFF);
+    lv_obj_align_to(bar_air, frame_air, LV_ALIGN_TOP_RIGHT, 10, -10);	// Align
 }
 
 void update_yaxun_screen(lv_timer_t * timer)
@@ -206,6 +233,7 @@ void update_yaxun_screen(lv_timer_t * timer)
 	lv_label_set_text_fmt(air_temperature, "%0.0f", temperature_air);
 	lv_label_set_text_fmt(preset_air, "%0.0f", target_air);
 	lv_label_set_text_fmt(preset_speed, "%ld", target_speed);
+	lv_bar_set_value(bar_air, (int32_t)target_speed, LV_ANIM_OFF);
 
 	if(target_speed == 100)
 		lv_obj_align_to(txt_pct, preset_speed, LV_ALIGN_TOP_LEFT, 44, 0);	// Align
@@ -229,7 +257,7 @@ void screen_debug(void)
     lv_obj_set_style_bg_color(frame_debug, lv_color_hex(0x000000), 0);
     lv_obj_set_style_bg_grad_color(frame_debug, lv_color_hex(0x000000), 0);
     lv_obj_set_style_border_color(frame_debug, lv_color_hex(0xAAA9AD), 0);
-    lv_obj_set_style_bg_opa(frame_debug, LV_OPA_50, 0);
+    lv_obj_set_style_bg_opa(frame_debug, LV_OPA_COVER, 0);
     lv_obj_clear_flag(frame_debug, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_pos(frame_debug, 0, 0);
 	//
