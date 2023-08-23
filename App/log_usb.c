@@ -51,7 +51,7 @@ void LogDebug(const char* fmt, ...)
 void Log_temp_iron(void)
 {
 	// HH:MM:SS - Termopar °C - ADC - PWM
-	sprintf(string_log, "%02d:%02d:%02d - %0.1f°C - %ld [%0.2fmV] - %d - %0.0F°C\n\r",
+	sprintf(string_log, "%02d:%02d:%02d - %0.2f C - %ld [%0.2fmV] - %d - %0.1f C\n",
 			RTC_Time.Hours,
 			RTC_Time.Minutes,
 			RTC_Time.Seconds,
@@ -66,7 +66,7 @@ void Log_temp_iron(void)
 void Log_temp_gun(void)
 {
 	// HH:MM:SS - Termopar °C - ADC - PWM
-	sprintf(string_log, "%02d:%02d:%02d - %0.1f°C - %ld [%0.2fmV] - %d - %0.0F°C\n\r",
+	sprintf(string_log, "%02d:%02d:%02d - %0.2f C - %ld [%0.2fmV] - %d - %0.1f C\n",
 			RTC_Time.Hours,
 			RTC_Time.Minutes,
 			RTC_Time.Seconds,
