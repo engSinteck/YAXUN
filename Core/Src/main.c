@@ -161,15 +161,21 @@ int main(void)
   MX_TIM9_Init();
   MX_ADC1_Init();
   MX_TIM2_Init();
+  MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_Base_Start(&htim5);
   HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
+  // PWM
   HAL_TIM_PWM_Start(&htim9, TIM_CHANNEL_1);
   pwm_iron = 0;
   __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);		// PWM_CH1 = 0 IRON
   // TIM4 Dimmer
-
+  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
+  HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, 10);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_3, 4000);
   // Start ADC
   idx_flt = 0;
   flt_flag = 0;
@@ -492,6 +498,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		  timer_key = 0;
 		  Key_Read();
 	  }
+  }
+  if(htim->Instance == TIM5) {
+	  HAL_GPIO_TogglePin(LED4_GPIO_Port, LED4_Pin);
   }
   /* USER CODE END Callback 1 */
 }
