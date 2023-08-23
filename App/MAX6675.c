@@ -18,6 +18,7 @@ float Max6675_Read_Temp(void)
 	float Temp=0;                                        	// Temperature Variable
 
 	hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_256;
+	 hspi1.Init.DataSize = SPI_DATASIZE_16BIT;
 	if (HAL_SPI_Init(&hspi1) != HAL_OK)
 	{
 		Error_Handler();
@@ -32,7 +33,8 @@ float Max6675_Read_Temp(void)
 	Temp=((((DATAMAX[0]|DATAMAX[1]<<8)))>>3);               // Temperature Data Extraction
 	Temp*=0.25;                                           	// Data to Centigrade Conversation
 
-	hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_4;
+	hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+	 hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
 	if (HAL_SPI_Init(&hspi1) != HAL_OK)
 	{
 		Error_Handler();
