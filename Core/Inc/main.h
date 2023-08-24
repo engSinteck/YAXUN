@@ -95,12 +95,6 @@ void Error_Handler(void);
 #define ENC2_B_GPIO_Port GPIOB
 #define ENC2_A_Pin GPIO_PIN_5
 #define ENC2_A_GPIO_Port GPIOB
-#define PWM_AIR_Pin GPIO_PIN_6
-#define PWM_AIR_GPIO_Port GPIOB
-#define ZERO_CROSS_Pin GPIO_PIN_7
-#define ZERO_CROSS_GPIO_Port GPIOB
-#define PWM_TEMP_Pin GPIO_PIN_8
-#define PWM_TEMP_GPIO_Port GPIOB
 #define LED2_Pin GPIO_PIN_9
 #define LED2_GPIO_Port GPIOB
 

@@ -67,7 +67,7 @@ void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_8;
   sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_144CYCLES;
+  sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -77,6 +77,7 @@ void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_9;
   sConfig.Rank = 2;
+  sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -96,6 +97,7 @@ void MX_ADC1_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_VREFINT;
   sConfig.Rank = 4;
+  sConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -186,7 +188,7 @@ uint32_t read_adc_ch(uint32_t channel)
 
 	adcConfig.Channel = channel;
 	adcConfig.Rank = 0;
-	adcConfig.SamplingTime = ADC_SAMPLETIME_144CYCLES;
+	adcConfig.SamplingTime = ADC_SAMPLETIME_480CYCLES;
 
 	if (HAL_ADC_ConfigChannel(&hadc1, &adcConfig) != HAL_OK) {
 	    Error_Handler();

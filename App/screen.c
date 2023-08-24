@@ -18,15 +18,13 @@ extern uint32_t ADC_iron, ADC_air;
 extern volatile uint32_t enc1_cnt, enc1_dir, enc1_btn;
 extern volatile uint32_t enc2_cnt, enc2_dir, enc2_btn;
 extern volatile uint32_t enc3_cnt, enc3_dir, enc3_btn;
-extern uint32_t flag_iron, flag_air;
 extern volatile uint8_t sw_air, sw_iron;
 extern uint32_t target_speed;
-extern uint32_t temp_iron, temp_air;
 extern float temperature_iron, temperature_air;
-extern float target_iron, target_air, temperature_K;
+extern float target_iron, target_air;
 extern uint16_t pwm_iron;
 extern char str_termopar[];
-extern float vdda, vref;
+extern float vdda, vref, temp_stm;
 extern RTC_TimeTypeDef RTC_Time;
 
 static lv_obj_t * Tela_Yaxun;
@@ -390,7 +388,7 @@ void screen_debug(void)
 	lv_obj_set_style_text_line_space(label_power, 1, 0);
 	lv_label_set_long_mode(label_power, LV_LABEL_LONG_WRAP);          	// Break the long lines
 	lv_label_set_recolor(label_power, true);                         	// Enable re-coloring by commands in the text
-	lv_label_set_text_fmt(label_power, "Vcca: %0.2f  Vref %0.2f", vdda, vref);
+	lv_label_set_text_fmt(label_power, "uC V:%0.2f  VR:%0.2f T:%0.1f", vdda, vref, temp_stm);
 	lv_obj_set_pos(label_power, 10, 272);
 
 	label_clock = lv_label_create(Tela_Debug);
@@ -425,7 +423,7 @@ void update_debug_screen(lv_timer_t * timer)
 	lv_label_set_text_fmt(label_sw_air,  "SW_AIR: %d",  sw_air);
 
 	lv_label_set_text_fmt(label_termopar, "%s", str_termopar);
-	lv_label_set_text_fmt(label_power, "Vcca: %0.3f  Vref %0.3f", vdda, vref);
+	lv_label_set_text_fmt(label_power, "uC V:%0.2f  VR:%0.2f T:%0.1f", vdda, vref, temp_stm);
 	lv_label_set_text_fmt(label_clock, "Time: %02d:%02d:%02d",RTC_Time.Hours,RTC_Time.Minutes,RTC_Time.Seconds);
 
 }

@@ -163,7 +163,7 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM5_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_Base_Start(&htim5);
+  HAL_TIM_Base_Start_IT(&htim5);
   HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
@@ -175,7 +175,7 @@ int main(void)
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
   __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, 10);
-  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_3, 4000);
+  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_3, 50);
   // Start ADC
   idx_flt = 0;
   flt_flag = 0;
@@ -284,6 +284,7 @@ int main(void)
 
 	  if(enc1_cnt != target_speed) {
 		  target_speed = map_speed(enc1_cnt, 0, 4095, 0, 100);
+		  __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, target_speed);
 	  }
 
 	  // Encoder 2
