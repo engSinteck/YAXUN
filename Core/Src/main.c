@@ -172,6 +172,7 @@ int main(void)
   pwm_iron = 0;
   __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);		// PWM_CH1 = 0 IRON
   // TIM4 Dimmer
+  HAL_TIM_IC_Init(&htim4);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_3);
   __HAL_TIM_SetCompare(&htim4, TIM_CHANNEL_1, 10);
