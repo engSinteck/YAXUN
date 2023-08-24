@@ -77,10 +77,10 @@ void Error_Handler(void);
 #define TFT_RST_GPIO_Port GPIOB
 #define TFT_DC_Pin GPIO_PIN_13
 #define TFT_DC_GPIO_Port GPIOB
-#define LED3_Pin GPIO_PIN_14
-#define LED3_GPIO_Port GPIOB
-#define LED4_Pin GPIO_PIN_15
-#define LED4_GPIO_Port GPIOB
+#define SW_IRON_Pin GPIO_PIN_14
+#define SW_IRON_GPIO_Port GPIOB
+#define SW_AIR_Pin GPIO_PIN_15
+#define SW_AIR_GPIO_Port GPIOB
 #define ENC1_B_Pin GPIO_PIN_8
 #define ENC1_B_GPIO_Port GPIOA
 #define ENC1_A_Pin GPIO_PIN_9
@@ -95,6 +95,13 @@ void Error_Handler(void);
 #define ENC2_B_GPIO_Port GPIOB
 #define ENC2_A_Pin GPIO_PIN_5
 #define ENC2_A_GPIO_Port GPIOB
+#define DIMMER_2_Pin GPIO_PIN_6
+#define DIMMER_2_GPIO_Port GPIOB
+#define DIMMER_1_Pin GPIO_PIN_7
+#define DIMMER_1_GPIO_Port GPIOB
+#define ZERO_CROSS_Pin GPIO_PIN_8
+#define ZERO_CROSS_GPIO_Port GPIOB
+#define ZERO_CROSS_EXTI_IRQn EXTI9_5_IRQn
 #define LED2_Pin GPIO_PIN_9
 #define LED2_GPIO_Port GPIOB
 
