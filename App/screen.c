@@ -26,6 +26,7 @@ extern uint16_t pwm_iron;
 extern char str_termopar[];
 extern float vdda, vref, temp_stm;
 extern RTC_TimeTypeDef RTC_Time;
+extern int dimmer_value[];
 
 static lv_obj_t * Tela_Yaxun;
 static lv_obj_t * img_iron;
@@ -366,7 +367,7 @@ void screen_debug(void)
     lv_obj_set_style_text_line_space(label_sw_air, 1, 0);
     lv_label_set_long_mode(label_sw_air, LV_LABEL_LONG_WRAP);          	// Break the long lines
     lv_label_set_recolor(label_sw_air, true);                         	// Enable re-coloring by commands in the text
-	lv_label_set_text_fmt(label_sw_air, "SW_AIR: %d", sw_air);
+	lv_label_set_text_fmt(label_sw_air, "SW_AIR: %d PWM: %d", sw_air, dimmer_value[1]);
 	lv_obj_set_pos(label_sw_air, 10, 224);
 
 	label_termopar = lv_label_create(Tela_Debug);
@@ -420,7 +421,7 @@ void update_debug_screen(lv_timer_t * timer)
 
 	lv_label_set_text_fmt(label_pwm_iron, "PWM_IRON: %d", pwm_iron);
 	lv_label_set_text_fmt(label_sw_iron, "SW_IRON: %d", sw_iron);
-	lv_label_set_text_fmt(label_sw_air,  "SW_AIR: %d",  sw_air);
+	lv_label_set_text_fmt(label_sw_air, "SW_AIR: %d PWM: %d", sw_air, dimmer_value[1]);
 
 	lv_label_set_text_fmt(label_termopar, "%s", str_termopar);
 	lv_label_set_text_fmt(label_power, "uC V:%0.2f  VR:%0.2f T:%0.1f", vdda, vref, temp_stm);

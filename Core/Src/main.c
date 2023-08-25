@@ -100,7 +100,7 @@ volatile bool isHandled[NUM_DIMMERS] = { 0, 0 };
 int State [NUM_DIMMERS] = { 1, 1 };
 bool pLampState[2]={ false, false };
 volatile int dimmer_Counter[NUM_DIMMERS] = { 0, 0 };
-int dimmer_value[NUM_DIMMERS] = { 90, 460 };
+int dimmer_value[NUM_DIMMERS] = { 200, 400 };
 
 /* USER CODE END PTD */
 
@@ -293,6 +293,7 @@ int main(void)
 
 	  if(enc1_cnt != target_speed) {
 		  target_speed = map_speed(enc1_cnt, 0, 4095, 0, 100);
+		  dimmer_value[1] = map_dimmer(enc1_cnt, 0, 4095, 0, 800);
 	  }
 
 	  // Encoder 2
@@ -502,27 +503,23 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 void Zero_Crossing_Int(void)
 {
-	if(NumActiveChannels > 0) {
-		NumHandled = 0;
+	NumHandled = 0;
 
-		for(int i=0; i<NUM_DIMMERS; i++) {
-			isHandled[i] = 0;
-			if(State[i] == 1) {
-				if(i == 0){
-				  HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
-				  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
-				}else if(i  == 1){
-				  HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_RESET);
-				}
-			}
-		}
-		zero_cross = 1;
-	}
+	isHandled[0] = 0;
+	isHandled[1] = 0;
+	HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_RESET);
+	//htim10.Instance->CNT = 0;
+	//dimmer_Counter[0] = 0;
+	//dimmer_Counter[1] = 0;
+
+	zero_cross = 1;
 }
 
 void dimTimerISR(void)
 {
-	for(int i = 0; i < NUM_DIMMERS; i++) {
+/*	for(int i = 0; i < NUM_DIMMERS; i++) {
 		if(pLampState[i] == 1) {
 			if(i == 0){
 				HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
@@ -534,7 +531,7 @@ void dimTimerISR(void)
 			}
 		}
 	}
-
+*/
 	if(zero_cross == 1) {
 		for(int i = 0; i < NUM_DIMMERS; i++) {
 			if(State[i] == 1) {
