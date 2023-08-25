@@ -379,7 +379,7 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-/*
+
 void debounce_input(void)
 {
 	// Debounce SW_AIR PIN
@@ -420,7 +420,6 @@ void debounce_input(void)
 		}
 	}
 }
-*/
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
@@ -568,7 +567,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
   /* USER CODE BEGIN Callback 1 */
   if (htim->Instance == TIM11) {
-	  //debounce_input();
+	  debounce_input();
 	  lv_tick_inc(1);
 	  timer_key++;
 	  if(timer_key >= PUSHBTN_TMR_PERIOD) {
