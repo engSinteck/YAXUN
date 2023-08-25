@@ -44,6 +44,7 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 #define DEBOUNCE_SW 	50
+#define NUM_DIMMERS 	2
 
 uint16_t adcBuffer[4]; 					// Buffer ADC conversion
 uint8_t buf_tft[320 * 10 * 2];
@@ -92,6 +93,15 @@ float temp_stm, ta, tb; // transfer function using calibration data
 RTC_TimeTypeDef RTC_Time = {0};
 RTC_DateTypeDef RTC_Date = {0};
 
+int NumActiveChannels = 2;
+volatile bool zero_cross = 0;
+volatile int NumHandled = 0;
+volatile bool isHandled[NUM_DIMMERS] = { 0, 0 };
+int State [NUM_DIMMERS] = { 1, 1 };
+bool pLampState[2]={ false, false };
+volatile int dimmer_Counter[NUM_DIMMERS] = { 92, 46 };
+int dimmer_value[NUM_DIMMERS] = { 10, 46 };
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -99,6 +109,8 @@ RTC_DateTypeDef RTC_Date = {0};
 void filter_adc(void);
 void calculate_calibration(void);
 uint32_t map_speed(uint32_t var, uint32_t x_min, uint32_t x_max, uint32_t y_min, uint32_t y_max);
+void Zero_Crossing_Int(void);
+void dimTimerISR(void);
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -180,10 +192,12 @@ int main(void)
   W25qxx_Init();
 
   // Apaga LEDS
-  // LED-1 - HEATER GUN
+  // LED-1 - PWM GUN
   // LED-2 - REPOUSO
   // LED-3 - OPERATE
-  // LED-4 - HEATER IRON
+  // LED-4 - PWM IRON
+  HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(RELAY_GPIO_Port,RELAY_Pin, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
@@ -467,12 +481,73 @@ uint32_t map_speed(uint32_t var, uint32_t x_min, uint32_t x_max, uint32_t y_min,
 // EXTI Line9 External Interrupt ISR Handler CallBackFun
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-    if(GPIO_Pin == ZERO_CROSS_Pin) // If The INT Source Is EXTI Line9 (A9 Pin)
+    if(GPIO_Pin == ZERO_CROSS_Pin) // If The INT Source Is EXTI Line7 (B7 Pin)
     {
-    	HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
+		HAL_NVIC_DisableIRQ(EXTI9_5_IRQn);
+		Zero_Crossing_Int();
+		HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
     }
 }
 
+void Zero_Crossing_Int(void)
+{
+	if(NumActiveChannels > 0) {
+		NumHandled = 0;
+
+		for(int i=0; i<NUM_DIMMERS; i++) {
+			isHandled[i] = 0;
+			if(State[i] == 1) {
+				if(i == 0){
+				  HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
+				}else if(i  == 1){
+				  HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_RESET);
+				}
+			}
+		}
+		zero_cross = 1;
+	}
+}
+
+void dimTimerISR(void)
+{
+	for(int i = 0; i < NUM_DIMMERS; i++) {
+		if(pLampState[i] == 1) {
+			if(i == 0){
+				HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
+				pLampState[i] = false;
+			}else if(i  == 1){
+				HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_RESET);
+				pLampState[i] = false;
+			}
+		}
+	}
+
+	if(zero_cross == 1) {
+		for(int i = 0; i < NUM_DIMMERS; i++) {
+			if(State[i] == 1) {
+				if(dimmer_Counter[i] > dimmer_value[i] ) {
+					if(i == 0){
+						HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_SET);
+						pLampState[i] = true;
+					}else if(i  == 1){
+						HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_SET);
+						pLampState[i] = true;
+					}
+					dimmer_Counter[i] = 0;
+					isHandled[i] = 1;
+
+					NumHandled++;
+					if(NumHandled == NumActiveChannels) {
+						zero_cross = 0;
+					}
+				}
+				else if(isHandled[i] == 0) {
+					dimmer_Counter[i]++;
+				}
+			}
+		}
+	}
+}
 /* USER CODE END 4 */
 
 /**
@@ -502,8 +577,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	  }
   }
   if(htim->Instance == TIM5) {
-	  HAL_GPIO_TogglePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin);
-	  HAL_GPIO_TogglePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin);
+	  dimTimerISR();
   }
   /* USER CODE END Callback 1 */
 }

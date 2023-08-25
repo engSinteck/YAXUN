@@ -95,13 +95,13 @@ void Error_Handler(void);
 #define ENC2_B_GPIO_Port GPIOB
 #define ENC2_A_Pin GPIO_PIN_5
 #define ENC2_A_GPIO_Port GPIOB
-#define DIMMER_2_Pin GPIO_PIN_6
-#define DIMMER_2_GPIO_Port GPIOB
-#define DIMMER_1_Pin GPIO_PIN_7
+#define DIMMER_1_Pin GPIO_PIN_6
 #define DIMMER_1_GPIO_Port GPIOB
-#define ZERO_CROSS_Pin GPIO_PIN_8
+#define ZERO_CROSS_Pin GPIO_PIN_7
 #define ZERO_CROSS_GPIO_Port GPIOB
 #define ZERO_CROSS_EXTI_IRQn EXTI9_5_IRQn
+#define DIMMER_2_Pin GPIO_PIN_8
+#define DIMMER_2_GPIO_Port GPIOB
 #define LED2_Pin GPIO_PIN_9
 #define LED2_GPIO_Port GPIOB
 

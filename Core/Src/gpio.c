@@ -57,7 +57,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, TFT_CS_Pin|FLASH_CS_Pin|CS_MAX_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, RELAY_Pin|DIMMER_2_Pin|DIMMER_1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, RELAY_Pin|DIMMER_1_Pin|DIMMER_2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, TFT_RST_Pin|TFT_DC_Pin|LED2_Pin, GPIO_PIN_SET);
@@ -90,8 +90,8 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : PBPin PBPin PBPin PBPin
                            PBPin PBPin */
-  GPIO_InitStruct.Pin = RELAY_Pin|TFT_RST_Pin|TFT_DC_Pin|DIMMER_2_Pin
-                          |DIMMER_1_Pin|LED2_Pin;
+  GPIO_InitStruct.Pin = RELAY_Pin|TFT_RST_Pin|TFT_DC_Pin|DIMMER_1_Pin
+                          |DIMMER_2_Pin|LED2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
