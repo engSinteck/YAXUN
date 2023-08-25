@@ -93,14 +93,14 @@ float temp_stm, ta, tb; // transfer function using calibration data
 RTC_TimeTypeDef RTC_Time = {0};
 RTC_DateTypeDef RTC_Date = {0};
 
-int NumActiveChannels = 2;
+int NumActiveChannels = NUM_DIMMERS;
 volatile bool zero_cross = 0;
 volatile int NumHandled = 0;
 volatile bool isHandled[NUM_DIMMERS] = { 0, 0 };
 int State [NUM_DIMMERS] = { 1, 1 };
 bool pLampState[2]={ false, false };
-volatile int dimmer_Counter[NUM_DIMMERS] = { 92, 46 };
-int dimmer_value[NUM_DIMMERS] = { 10, 46 };
+volatile int dimmer_Counter[NUM_DIMMERS] = { 0, 0 };
+int dimmer_value[NUM_DIMMERS] = { 90, 460 };
 
 /* USER CODE END PTD */
 
@@ -174,8 +174,10 @@ int main(void)
   MX_ADC1_Init();
   MX_TIM2_Init();
   MX_TIM5_Init();
+  MX_TIM10_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim5);
+  HAL_TIM_Base_Start_IT(&htim10);
   HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
   HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
@@ -591,6 +593,17 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if(htim->Instance == TIM5) {
 	  dimTimerISR();
   }
+  if(htim->Instance == TIM10) {
+	  HAL_GPIO_WritePin(RELAY_GPIO_Port, RELAY_Pin, GPIO_PIN_SET);
+	  __NOP();
+	  __NOP();
+	  __NOP();
+	  __NOP();
+	  __NOP();
+	  __NOP();
+	  HAL_GPIO_WritePin(RELAY_GPIO_Port, RELAY_Pin, GPIO_PIN_RESET);
+  }
+
   /* USER CODE END Callback 1 */
 }
 
