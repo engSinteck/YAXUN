@@ -109,6 +109,7 @@ int dimmer_value[NUM_DIMMERS] = { 10, 46 };
 void filter_adc(void);
 void calculate_calibration(void);
 uint32_t map_speed(uint32_t var, uint32_t x_min, uint32_t x_max, uint32_t y_min, uint32_t y_max);
+int map_dimmer(int var, int x_min, int x_max, int y_min, int y_max);
 void Zero_Crossing_Int(void);
 void dimTimerISR(void);
 /* USER CODE END PD */
@@ -477,6 +478,14 @@ uint32_t map_speed(uint32_t var, uint32_t x_min, uint32_t x_max, uint32_t y_min,
 	return (uint32_t)(value - x_min) * (y_max - y_min) / (x_max - x_min) + x_min;
 }
 
+int map_dimmer(int var, int x_min, int x_max, int y_min, int y_max)
+{
+	int value = var;
+
+	if(value >= x_max) value = x_max;
+	return (int)(value - x_min) * (y_max - y_min) / (x_max - x_min) + x_min;
+}
+
 // EXTI Line9 External Interrupt ISR Handler CallBackFun
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
@@ -484,6 +493,7 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     {
 		HAL_NVIC_DisableIRQ(EXTI9_5_IRQn);
 		Zero_Crossing_Int();
+		HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
 		HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
     }
 }
@@ -498,6 +508,7 @@ void Zero_Crossing_Int(void)
 			if(State[i] == 1) {
 				if(i == 0){
 				  HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
+				  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
 				}else if(i  == 1){
 				  HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_RESET);
 				}
@@ -513,6 +524,7 @@ void dimTimerISR(void)
 		if(pLampState[i] == 1) {
 			if(i == 0){
 				HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
+				HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
 				pLampState[i] = false;
 			}else if(i  == 1){
 				HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_RESET);
@@ -527,6 +539,7 @@ void dimTimerISR(void)
 				if(dimmer_Counter[i] > dimmer_value[i] ) {
 					if(i == 0){
 						HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_SET);
+						HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
 						pLampState[i] = true;
 					}else if(i  == 1){
 						HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_SET);
