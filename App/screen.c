@@ -9,7 +9,7 @@
 #include "screen.h"
 #include "../lvgl/lvgl.h"
 
-LV_FONT_DECLARE(lv_font_7Seg_B64);
+LV_FONT_DECLARE(lv_font_7Seg_B72);
 LV_FONT_DECLARE(lv_font_7Seg_B16);
 LV_IMG_DECLARE(iron);
 LV_IMG_DECLARE(airflow);
@@ -86,21 +86,21 @@ void create_iron(void)
 {
 	// Desenha Frame Iron
 	frame_iron = lv_obj_create(Tela_Yaxun);
-    lv_obj_set_size(frame_iron, 236, 80);
+    lv_obj_set_size(frame_iron, 236, 88);
     lv_obj_set_style_radius(frame_iron, 2, 0);
     lv_obj_set_style_bg_color(frame_iron, lv_color_hex(0x000000), 0);
     lv_obj_set_style_bg_grad_color(frame_iron, lv_color_hex(0x000000), 0);
     lv_obj_set_style_border_color(frame_iron, lv_color_hex(0xAAA9AD), 0);
     lv_obj_set_style_bg_opa(frame_iron, LV_OPA_COVER, 0);
     lv_obj_clear_flag(frame_iron, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_pos(frame_iron, 1, 32);
+    lv_obj_set_pos(frame_iron, 1, 28);
     // Image IRON
 	img_iron = lv_img_create(frame_iron);
 	lv_img_set_src(img_iron, &iron);
 	lv_obj_align_to(img_iron, frame_iron, LV_ALIGN_TOP_LEFT, 0, 8);	// Align
 	// Label Temperature IRON
     iron_temperature = lv_label_create(frame_iron);
-    lv_obj_set_style_text_font(iron_temperature, &lv_font_7Seg_B64, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(iron_temperature, &lv_font_7Seg_B72, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(iron_temperature, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(iron_temperature, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(iron_temperature, 1, 0);
@@ -150,21 +150,21 @@ void create_air(void)
 {
 	// Desenha Frame Air
 	frame_air = lv_obj_create(Tela_Yaxun);
-    lv_obj_set_size(frame_air, 236, 80);
+    lv_obj_set_size(frame_air, 236, 88);
     lv_obj_set_style_radius(frame_air, 2, 0);
     lv_obj_set_style_bg_color(frame_air, lv_color_hex(0x000000), 0);
     lv_obj_set_style_bg_grad_color(frame_air, lv_color_hex(0x000000), 0);
     lv_obj_set_style_border_color(frame_air, lv_color_hex(0xAAA9AD), 0);
     lv_obj_set_style_bg_opa(frame_air, LV_OPA_COVER, 0);
     lv_obj_clear_flag(frame_air, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_pos(frame_air, 1, 238);
+    lv_obj_set_pos(frame_air, 1, 231);
     // Image AIR
 	img_air = lv_img_create(frame_air);
 	lv_img_set_src(img_air, &airflow);
 	lv_obj_align_to(img_air, frame_air, LV_ALIGN_TOP_LEFT, 0, 6);	// Align
     // Label Temperature Air
     air_temperature = lv_label_create(frame_air);
-    lv_obj_set_style_text_font(air_temperature, &lv_font_7Seg_B64, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(air_temperature, &lv_font_7Seg_B72, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(air_temperature, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(air_temperature, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(air_temperature, 1, 0);

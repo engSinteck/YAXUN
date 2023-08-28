@@ -9,7 +9,7 @@
 #include "spi.h"
 
 // ------------------- Variables ----------------
-_Bool TCF_IRON = 0, TCF_AIR;                                          		// Thermocouple Connection acknowledge Flag
+_Bool TCF_IRON = 0, TCF_AIR = 0;                                          		// Thermocouple Connection acknowledge Flag
 uint8_t DATAMAX[2];                                    		// Raw Data from MAX6675
 
 // ------------------- Functions ----------------
