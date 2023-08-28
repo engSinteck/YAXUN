@@ -31,6 +31,7 @@
 #include "string.h"
 #include "stdio.h"
 #include "../App/ILI9341.h"
+#include "../App/ILI9488.h"
 #include "../App/MAX6675.h"
 #include "../App/W25qxx.h"
 #include "../App/key.h"
@@ -47,7 +48,8 @@
 #define NUM_DIMMERS 	2
 
 uint16_t adcBuffer[4]; 					// Buffer ADC conversion
-uint8_t buf_tft[320 * 10 * 2];
+uint8_t buf_tft[ILI9341_SCREEN_WIDTH * 10 * 2];
+//uint8_t buf_tft[ILI9488_SCREEN_WIDTH * 10 * 3];
 
 uint32_t ADC_iron = 0, ADC_air = 0, ADC_temp = 0, ADC_vref = 0;
 uint32_t flt_adc_8[8] ={0};
@@ -220,23 +222,33 @@ int main(void)
   ILI9341_Set_Rotation(1);
   ILI9341_Fill_Screen(0x0000);
 
+  //ILI9488_Init();
+  //ILI9488_Set_Address(0, 0, ILI9488_SCREEN_WIDTH-1, ILI9488_SCREEN_HEIGHT-1);
+  //ILI9488_Set_Rotation(1);
+  //ILI9488_Fill_Screen(0x0000);
+
   IRON_TABLE_Interpolation();
   AIR_TABLE_Interpolation();
 
   lv_init();
 
   static lv_disp_draw_buf_t draw_buf;
-  static lv_color_t buf1[(320 * 10)];                        		// Declare a buffer for 1/10 screen size
-  static lv_color_t buf2[(320 * 10)];                        		// Declare a buffer for 1/10 screen size
-  lv_disp_draw_buf_init(&draw_buf, buf1, buf2, (320 * 10) );		// Initialize the display buffer.
+  static lv_color_t buf1[(ILI9341_SCREEN_WIDTH * 10)];                        		// Declare a buffer for 1/10 screen size
+  static lv_color_t buf2[(ILI9341_SCREEN_WIDTH * 10)];                        		// Declare a buffer for 1/10 screen size
+  lv_disp_draw_buf_init(&draw_buf, buf1, buf2, (ILI9341_SCREEN_WIDTH * 10) );		// Initialize the display buffer.
 
   static lv_disp_drv_t disp_drv;        // Descriptor of a display driver
   lv_disp_drv_init(&disp_drv);          // Basic initialization
 
   disp_drv.flush_cb = ILI9341_Flush;    // Set your driver function
+  disp_drv.hor_res = ILI9341_SCREEN_WIDTH;   			// Set the horizontal resolution of the display
+  disp_drv.ver_res = ILI9341_SCREEN_HEIGHT;   			// Set the vertical resolution of the display
+
+  //disp_drv.flush_cb = ILI9488_Flush;	//Set your driver function
+  //disp_drv.hor_res = ILI9488_SCREEN_WIDTH;   			// Set the horizontal resolution of the display
+  //disp_drv.ver_res = ILI9488_SCREEN_HEIGHT;   			// Set the vertical resolution of the display
+
   disp_drv.draw_buf = &draw_buf;        // Assign the buffer to the display
-  disp_drv.hor_res = 320;   			// Set the horizontal resolution of the display
-  disp_drv.ver_res = 240;   			// Set the vertical resolution of the display
   disp_drv.rotated    = LV_DISP_ROT_90;
   disp_drv.sw_rotate  = 1;
   lv_disp_drv_register(&disp_drv);      // Finally register the driver

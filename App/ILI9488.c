@@ -107,6 +107,8 @@
 #define ABS(x)   ((x) > 0 ? (x) : -(x))
 
 /* Global Variables ------------------------------------------------------------------*/
+extern uint8_t buf_tft[];
+
 volatile uint16_t LCD_HEIGHT_9488 = ILI9488_SCREEN_HEIGHT;
 volatile uint16_t LCD_WIDTH_9488  = ILI9488_SCREEN_WIDTH;
 uint16_t POINT_COLOR = 0x0000, BACK_COLOR = 0xFFFF;
@@ -991,8 +993,7 @@ void ILI9488_Puts26x48(uint16_t x, uint16_t y, uint8_t *string, uint8_t TFT_STRI
 */
 void ILI9488_Flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p)
 {
-	uint16_t size;
-	uint16_t teste = 0;
+	int32_t size;
 
     size = ( ((area->x2 - area->x1) + 1)  * ((area->y2 - area->y1) + 1) );
     ILI9488_Set_Address(area->x1, area->y1, area->x2, area->y2);
@@ -1006,7 +1007,33 @@ void ILI9488_Flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t 
 		HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_RESET);
 		HAL_SPI_Transmit(HSPI_INSTANCE, (uint8_t *)&TempBuffer[0], 3, HAL_MAX_DELAY);
 		color_p++;
-		teste++;
 		HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_SET);
 	}
+
+	lv_disp_flush_ready(disp_drv);                  /* Tell you are ready with the flushing*/
+}
+
+void ILI9488_Flush_2(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p)
+{
+	int32_t size;
+
+    size = ( ((area->x2 - area->x1) + 1)  * ((area->y2 - area->y1) + 1) );
+    ILI9488_Set_Address(area->x1, area->y1, area->x2, area->y2);
+
+    //                                  RED               GREEN           BLUE
+    //unsigned char TempBuffer[3] = {(Colour>>8)&0xF8, (Colour>>3)&0xFC, Colour<<3};
+
+	HAL_GPIO_WritePin(LCD_DC_PORT, LCD_DC_PIN, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_RESET);
+
+	for(int32_t x = 0; x <= size-1; x++) {
+		buf_tft[x*2] = (color_p->full>>8)&0xF8;
+		buf_tft[(x*2)+1] = (color_p->full>>3)&0xFC;
+		buf_tft[(x*2)+2] = color_p->full<<3;
+		color_p++;
+	}
+	HAL_SPI_Transmit(HSPI_INSTANCE, (uint8_t *)&buf_tft[0], (uint16_t)((size-1)*3), HAL_MAX_DELAY);
+	HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_SET);
+
+	lv_disp_flush_ready(disp_drv);                  /* Tell you are ready with the flushing*/
 }
