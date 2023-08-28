@@ -108,7 +108,7 @@ int dimmer_value[NUM_DIMMERS] = { 200, 400 };
 /* USER CODE BEGIN PD */
 void filter_adc(void);
 void calculate_calibration(void);
-uint32_t map_speed(uint32_t var, uint32_t x_min, uint32_t x_max, uint32_t y_min, uint32_t y_max);
+uint32_t map_uint32(uint32_t var, uint32_t x_min, uint32_t x_max, uint32_t y_min, uint32_t y_max);
 int map_dimmer(int var, int x_min, int x_max, int y_min, int y_max);
 void Zero_Crossing_Int(void);
 void dimTimerISR(void);
@@ -286,35 +286,32 @@ int main(void)
 	  enc1_cnt = htim1.Instance->CNT >> 2;
 	  enc1_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim1));
 
-	  if(enc1_cnt != pwm_iron) {
-		  pwm_iron = (uint16_t) enc1_cnt;
-		  __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);	// PWM_CH1 = 0 IRON
-	  }
-
 	  if(enc1_cnt != target_speed) {
-		  target_speed = map_speed(enc1_cnt, 0, 4095, 0, 100);
-		  dimmer_value[1] = map_dimmer(enc1_cnt, 0, 4095, 0, 800);
+		  target_speed = map_uint32(enc1_cnt, 0, 1023, 0, 100);
+		  dimmer_value[1] = map_dimmer(enc1_cnt, 0, 1023, 0, 800);
 	  }
 
 	  // Encoder 2
 	  enc2_cnt = htim3.Instance->CNT >> 2;
 	  enc2_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3));
 
-	  if(enc2_cnt != FLOAT_TO_INT(target_iron)) {
-		  target_iron = (float)enc2_cnt;
-	  }
-
 	  if(enc2_cnt != FLOAT_TO_INT(target_air)) {
-		  target_air = (float)enc2_cnt;
+		  target_air = (float)map_uint32(enc2_cnt, 0, 1023, 0, 525);
+		  dimmer_value[0] = map_dimmer(enc2_cnt, 0, 1023, 0, 800);
 	  }
 
 	  // Encoder 3
 	  enc3_cnt = htim2.Instance->CNT >> 2;
 	  enc3_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim2));
 
-	  //if(enc3_cnt != FLOAT_TO_INT(target_iron)) {
-	  //	  target_iron = (float)enc3_cnt;
-	  //}
+	  if(enc3_cnt != FLOAT_TO_INT(target_iron)) {
+	  	  target_iron = (float)map_uint32(enc3_cnt, 0, 4095, 0, 525);
+	  }
+
+	  if(enc3_cnt != pwm_iron) {
+		  pwm_iron = (uint16_t) enc3_cnt;
+		  __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);	// PWM_CH1 = 0 IRON
+	  }
 
 	  // Buttons Encoders
 	  KeyboardEvent();
@@ -473,7 +470,7 @@ void calculate_calibration(void)
 
 }
 
-uint32_t map_speed(uint32_t var, uint32_t x_min, uint32_t x_max, uint32_t y_min, uint32_t y_max)
+uint32_t map_uint32(uint32_t var, uint32_t x_min, uint32_t x_max, uint32_t y_min, uint32_t y_max)
 {
 	uint32_t value = var;
 

@@ -341,9 +341,6 @@ void KeyboardEvent(void)
 				else if(event[2] == PBTN_LCLK) {
 				}
 				else if(event[2] == PBTN_DCLK) {
-					if(event[1] == 0) {
-						target_iron = (float)enc1_cnt;
-					}
 					if(event[1] == 1) {
 						if(flag_screen == 1) {
 							flag_screen = 0;
