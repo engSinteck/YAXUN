@@ -82,10 +82,11 @@ float target_iron, target_air;
 uint32_t flag_iron, flag_air;
 
 uint16_t pwm_iron = 0;
-float temperature_K, temp_K;
+float temperature_air_K, temperature_K, temp_iron_K, temp_air_K;
 
-extern _Bool TCF;
-char str_termopar[32] = {0};
+extern _Bool TCF_IRON, TCF_AIR;
+char str_termopar_iron[32] = {0};
+char str_termopar_air[32] = {0};
 float vdda = 0; // Result of VDDA calculation
 float vref = 0; // Result of vref calculation
 float temp_stm, ta, tb; // transfer function using calibration data
@@ -266,13 +267,23 @@ int main(void)
 
 	  if(HAL_GetTick() - timer_max > 250) {
 		  timer_max = HAL_GetTick();
-		  temp_K = Max6675_Read_Temp();
-		  if(TCF == 0) {
-			  temperature_K = temp_K;
-			  sprintf(str_termopar, "Temp(K): %0.2f°C", temperature_K);
+		  // Temperatura Iron
+		  temp_iron_K = Max6675_Read_Temp(0);
+		  if(TCF_IRON == 0) {
+			  temperature_K = temp_iron_K;
+			  sprintf(str_termopar_iron, "Temp(K): %0.2f°C", temperature_K);
 		  }
 		  else {
-			  sprintf(str_termopar, "Temp(K): Not Connected");
+			  sprintf(str_termopar_iron, "Temp(K): Not Connected");
+		  }
+		  // Temperatura Air
+		  temp_air_K = Max6675_Read_Temp(1);
+		  if(TCF_AIR == 0) {
+			  temperature_air_K = temp_air_K;
+			  sprintf(str_termopar_air, "Temp(K): %0.2f°C", temperature_air_K);
+		  }
+		  else {
+			  sprintf(str_termopar_air, "Temp(K): Not Connected");
 		  }
 	  }
 

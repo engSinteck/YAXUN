@@ -11,10 +11,13 @@
 #include "main.h"
 
 // ------------------------- Defines -------------------------
-#define SSPORT CS_MAX_GPIO_Port       	// GPIO Port of Chip Select(Slave Select)
-#define SSPIN  CS_MAX_Pin  				// GPIO PIN of Chip Select(Slave Select)
+#define SSPORT1 CS_MAX_GPIO_Port       	// GPIO Port of Chip Select(Slave Select)
+#define SSPIN1  CS_MAX_Pin  				// GPIO PIN  of Chip Select(Slave Select)
+
+#define SSPORT2 CS_MAX_GPIO_Port       	// GPIO Port of Chip Select(Slave Select)
+#define SSPIN2  CS_MAX_Pin  				// GPIO PIN  of Chip Select(Slave Select)
 // ------------------------- Functions  ----------------------
 
-float Max6675_Read_Temp(void);
+float Max6675_Read_Temp(uint8_t channel);
 
 #endif /* MAX6675_H_ */
