@@ -105,7 +105,7 @@ volatile bool isHandled[NUM_DIMMERS] = { 0, 0 };
 int State [NUM_DIMMERS] = { 1, 1 };
 bool pLampState[2]={ false, false };
 volatile int dimmer_Counter[NUM_DIMMERS] = { 0, 0 };
-int dimmer_value[NUM_DIMMERS] = { 200, 400 };
+int dimmer_value[NUM_DIMMERS] = { 0, 0 };
 
 /* USER CODE END PTD */
 
