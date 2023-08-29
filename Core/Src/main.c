@@ -204,8 +204,8 @@ int main(void)
   // LED-2 - REPOUSO
   // LED-3 - OPERATE
   // LED-4 - PWM IRON
-  HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(RELAY_GPIO_Port,RELAY_Pin, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
@@ -229,8 +229,8 @@ int main(void)
   //ILI9488_Set_Rotation(1);
   //ILI9488_Fill_Screen(0x0000);
 
-  IRON_TABLE_Interpolation();
-  AIR_TABLE_Interpolation();
+  //IRON_TABLE_Interpolation();
+  //AIR_TABLE_Interpolation();
 
   lv_init();
 
@@ -250,7 +250,7 @@ int main(void)
   //disp_drv.hor_res = ILI9488_SCREEN_WIDTH;   			// Set the horizontal resolution of the display
   //disp_drv.ver_res = ILI9488_SCREEN_HEIGHT;   			// Set the vertical resolution of the display
 
-  disp_drv.draw_buf = &draw_buf;        // Assign the buffer to the display
+  disp_drv.draw_buf   = &draw_buf;        // Assign the buffer to the display
   disp_drv.rotated    = LV_DISP_ROT_90;
   disp_drv.sw_rotate  = 1;
   lv_disp_drv_register(&disp_drv);      // Finally register the driver
@@ -343,9 +343,9 @@ int main(void)
 
 	  // Read ADC
 	  filter_adc();
-	  adc_ch8 = ADC_iron * ((float)3300.0/4095.0);
-	  adc_ch9 = ADC_air * ((float)3300.0/4095.0);
-	  ADC_MeasurementCorrection();
+	  //adc_ch8 = ADC_iron * ((float)3300.0/4095.0);
+	  //adc_ch9 = ADC_air * ((float)3300.0/4095.0);
+	  //ADC_MeasurementCorrection();
 
 	  // Controle de Temperatura
 //	  control_temperature_iron();

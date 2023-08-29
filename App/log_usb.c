@@ -8,7 +8,7 @@
 #include "log_usb.h"
 
 extern RTC_TimeTypeDef RTC_Time;
-extern float temperature_K, temperature_iron, temperature_air;
+extern float temperature_K, temperature_air_K, temperature_iron, temperature_air;
 extern uint32_t ADC_iron, ADC_air;
 extern uint16_t pwm_iron, pwm_air;
 
@@ -51,30 +51,25 @@ void LogDebug(const char* fmt, ...)
 void Log_temp_iron(void)
 {
 	// HH:MM:SS - Termopar °C - ADC - PWM
-	sprintf(string_log, "%02d:%02d:%02d - %0.2f C - %ld [%0.2fmV] - %d - %0.1f C\n",
+	sprintf(string_log, "%02d:%02d:%02d - %0.2f C - %d \n",
 			RTC_Time.Hours,
 			RTC_Time.Minutes,
 			RTC_Time.Seconds,
 			temperature_K,
-			ADC_iron,
-			(float)ADC_iron * ((float)3300.0/4095.0),
-			pwm_iron,
-			temperature_iron );
+			pwm_iron );
+
 	LogDebug(string_log);
 }
 
 void Log_temp_gun(void)
 {
 	// HH:MM:SS - Termopar °C - ADC - PWM
-	sprintf(string_log, "%02d:%02d:%02d - %0.2f C - %ld [%0.2fmV] - %d - %0.1f C\n",
+	sprintf(string_log, "%02d:%02d:%02d - %0.2f C - %d \n",
 			RTC_Time.Hours,
 			RTC_Time.Minutes,
 			RTC_Time.Seconds,
-			temperature_K,
-			ADC_air,
-			(float)ADC_air * ((float)3300.0/4095.0),
-			pwm_air,
-			temperature_air );
+			temperature_air_K,
+			pwm_air );
 	LogDebug(string_log);
 
 }

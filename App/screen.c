@@ -28,6 +28,7 @@ extern char str_termopar_air[];
 extern float vdda, vref, temp_stm;
 extern RTC_TimeTypeDef RTC_Time;
 extern int dimmer_value[];
+extern float temperature_K, temperature_air_K;
 
 static lv_obj_t * Tela_Yaxun;
 static lv_obj_t * img_iron;
@@ -324,7 +325,7 @@ void screen_debug(void)
     lv_obj_set_style_text_line_space(label_temp_iron, 1, 0);
     lv_label_set_long_mode(label_temp_iron, LV_LABEL_LONG_WRAP);          	// Break the long lines
     lv_label_set_recolor(label_temp_iron, true);                         	// Enable re-coloring by commands in the text
-	lv_label_set_text_fmt(label_temp_iron, "IRON °C: %0.1f", temperature_iron);
+	lv_label_set_text_fmt(label_temp_iron, "IRON °C: %0.1f", temperature_K);
 	lv_obj_set_pos(label_temp_iron, 10, 118);
 
 	label_temp_air = lv_label_create(Tela_Debug);
@@ -335,7 +336,7 @@ void screen_debug(void)
 	lv_obj_set_style_text_line_space(label_temp_air, 1, 0);
 	lv_label_set_long_mode(label_temp_air, LV_LABEL_LONG_WRAP);          	// Break the long lines
 	lv_label_set_recolor(label_temp_air, true);                         	// Enable re-coloring by commands in the text
-    lv_label_set_text_fmt(label_temp_air, "AIR °C: %0.1f", temperature_air);
+    lv_label_set_text_fmt(label_temp_air, "AIR °C: %0.1f", temperature_air_K);
 	lv_obj_set_pos(label_temp_air, 10, 140);
 
 	label_sw_iron = lv_label_create(Tela_Debug);
@@ -413,8 +414,8 @@ void update_debug_screen(lv_timer_t * timer)
 	lv_label_set_text_fmt(adc_iron, "ADC8: %ld - %0.1fmV", ADC_iron, (float)(ADC_iron * ((float)3300.0/4095)));
 	lv_label_set_text_fmt(adc_air, "ADC9: %ld - %0.1fmV", ADC_air, (float)(ADC_air * ((float)3300.0/4095)));
 
-	lv_label_set_text_fmt(label_temp_iron, "IRON °C: %0.1f", temperature_iron);
-	lv_label_set_text_fmt(label_temp_air, "AIR °C: %0.1f", temperature_air);
+	lv_label_set_text_fmt(label_temp_iron, "IRON °C: %0.1f", temperature_K);
+	lv_label_set_text_fmt(label_temp_air, "AIR °C: %0.1f", temperature_air_K);
 
 	lv_label_set_text_fmt(enc_1, "ENC1 - %ld  Dir: %ld Btn: %ld", enc1_cnt, enc1_dir, enc1_btn);
 	lv_label_set_text_fmt(enc_2, "ENC2 - %ld  Dir: %ld Btn: %ld", enc2_cnt, enc2_dir, enc2_btn);
