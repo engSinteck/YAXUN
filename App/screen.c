@@ -9,7 +9,7 @@
 #include "screen.h"
 #include "../lvgl/lvgl.h"
 
-LV_FONT_DECLARE(lv_font_7Seg_B72);
+LV_FONT_DECLARE(lv_font_7Seg_B64);
 LV_FONT_DECLARE(lv_font_7Seg_B16);
 LV_IMG_DECLARE(iron);
 LV_IMG_DECLARE(airflow);
@@ -56,7 +56,6 @@ static lv_obj_t * label_sw_iron;
 static lv_obj_t * label_sw_air;
 static lv_obj_t * label_temp_iron;
 static lv_obj_t * label_temp_air;
-static lv_obj_t * label_pwm_iron;
 static lv_obj_t * label_termopar;
 static lv_obj_t * label_termopar1;
 static lv_obj_t * label_power;
@@ -100,7 +99,7 @@ void create_iron(void)
 	lv_obj_align_to(img_iron, frame_iron, LV_ALIGN_TOP_LEFT, 0, 8);	// Align
 	// Label Temperature IRON
     iron_temperature = lv_label_create(frame_iron);
-    lv_obj_set_style_text_font(iron_temperature, &lv_font_7Seg_B72, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(iron_temperature, &lv_font_7Seg_B64, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(iron_temperature, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(iron_temperature, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(iron_temperature, 1, 0);
@@ -164,7 +163,7 @@ void create_air(void)
 	lv_obj_align_to(img_air, frame_air, LV_ALIGN_TOP_LEFT, 0, 6);	// Align
     // Label Temperature Air
     air_temperature = lv_label_create(frame_air);
-    lv_obj_set_style_text_font(air_temperature, &lv_font_7Seg_B72, LV_PART_MAIN | LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(air_temperature, &lv_font_7Seg_B64, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(air_temperature, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_opa(air_temperature, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(air_temperature, 1, 0);
@@ -339,17 +338,6 @@ void screen_debug(void)
     lv_label_set_text_fmt(label_temp_air, "AIR °C: %0.1f", temperature_air);
 	lv_obj_set_pos(label_temp_air, 10, 140);
 
-	label_pwm_iron = lv_label_create(Tela_Debug);
-	lv_obj_set_style_text_font(label_pwm_iron, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_text_color(label_pwm_iron, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_text_opa(label_pwm_iron, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
-	lv_obj_set_style_text_letter_space(label_pwm_iron, 1, 0);
-	lv_obj_set_style_text_line_space(label_pwm_iron, 1, 0);
-	lv_label_set_long_mode(label_pwm_iron, LV_LABEL_LONG_WRAP);          	// Break the long lines
-	lv_label_set_recolor(label_pwm_iron, true);                         	// Enable re-coloring by commands in the text
-	lv_label_set_text_fmt(label_pwm_iron, "PWM_IRON: %d", pwm_iron);
-	lv_obj_set_pos(label_pwm_iron, 10, 162);
-
 	label_sw_iron = lv_label_create(Tela_Debug);
     lv_obj_set_style_text_font(label_sw_iron, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_color(label_sw_iron, lv_color_hex(0xFFFFFF), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -358,8 +346,8 @@ void screen_debug(void)
     lv_obj_set_style_text_line_space(label_sw_iron, 1, 0);
     lv_label_set_long_mode(label_sw_iron, LV_LABEL_LONG_WRAP);          	// Break the long lines
     lv_label_set_recolor(label_sw_iron, true);                         	// Enable re-coloring by commands in the text
-	lv_label_set_text_fmt(label_sw_iron, "SW_IRON: %d", sw_iron);
-	lv_obj_set_pos(label_sw_iron, 10, 184);
+	lv_label_set_text_fmt(label_sw_iron, "SW_IRON: %d PWM: %d", sw_iron, pwm_iron);
+	lv_obj_set_pos(label_sw_iron, 10, 162);
 
 	label_sw_air = lv_label_create(Tela_Debug);
     lv_obj_set_style_text_font(label_sw_air, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -369,8 +357,8 @@ void screen_debug(void)
     lv_obj_set_style_text_line_space(label_sw_air, 1, 0);
     lv_label_set_long_mode(label_sw_air, LV_LABEL_LONG_WRAP);          	// Break the long lines
     lv_label_set_recolor(label_sw_air, true);                         	// Enable re-coloring by commands in the text
-	lv_label_set_text_fmt(label_sw_air, "SW_AIR: %d PWM: %d", sw_air, dimmer_value[1]);
-	lv_obj_set_pos(label_sw_air, 10, 206);
+	lv_label_set_text_fmt(label_sw_air, "SW_AIR: %d S: %d PWM: %d", sw_air, dimmer_value[0], dimmer_value[1]);
+	lv_obj_set_pos(label_sw_air, 10, 184);
 
 	label_termopar = lv_label_create(Tela_Debug);
     lv_obj_set_style_text_font(label_termopar, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -381,7 +369,7 @@ void screen_debug(void)
     lv_label_set_long_mode(label_termopar, LV_LABEL_LONG_WRAP);          	// Break the long lines
     lv_label_set_recolor(label_termopar, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(label_termopar, "%s", str_termopar_iron);
-	lv_obj_set_pos(label_termopar, 10, 228);
+	lv_obj_set_pos(label_termopar, 10, 206);
 
 	label_termopar1 = lv_label_create(Tela_Debug);
     lv_obj_set_style_text_font(label_termopar1, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -392,7 +380,7 @@ void screen_debug(void)
     lv_label_set_long_mode(label_termopar1, LV_LABEL_LONG_WRAP);          	// Break the long lines
     lv_label_set_recolor(label_termopar1, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(label_termopar1, "%s", str_termopar_air);
-	lv_obj_set_pos(label_termopar1, 10, 250);
+	lv_obj_set_pos(label_termopar1, 10, 228);
 
 	label_power = lv_label_create(Tela_Debug);
 	lv_obj_set_style_text_font(label_power, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -403,7 +391,7 @@ void screen_debug(void)
 	lv_label_set_long_mode(label_power, LV_LABEL_LONG_WRAP);          	// Break the long lines
 	lv_label_set_recolor(label_power, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(label_power, "uC V:%0.2f  VR:%0.2f T:%0.1f", vdda, vref, temp_stm);
-	lv_obj_set_pos(label_power, 10, 272);
+	lv_obj_set_pos(label_power, 10, 250);
 
 	label_clock = lv_label_create(Tela_Debug);
 	lv_obj_set_style_text_font(label_clock, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -414,7 +402,7 @@ void screen_debug(void)
 	lv_label_set_long_mode(label_clock, LV_LABEL_LONG_WRAP);          	// Break the long lines
 	lv_label_set_recolor(label_clock, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(label_clock, "Time: %02d:%02d:%02d",RTC_Time.Hours,RTC_Time.Minutes,RTC_Time.Seconds);
-	lv_obj_set_pos(label_clock, 10, 294);
+	lv_obj_set_pos(label_clock, 10, 272);
 
     static uint32_t user_data = 10;
     task_debug = lv_timer_create(update_debug_screen, 250,  &user_data);
@@ -432,9 +420,8 @@ void update_debug_screen(lv_timer_t * timer)
 	lv_label_set_text_fmt(enc_2, "ENC2 - %ld  Dir: %ld Btn: %ld", enc2_cnt, enc2_dir, enc2_btn);
 	lv_label_set_text_fmt(enc_3, "ENC3 - %ld  Dir: %ld Btn: %ld", enc3_cnt, enc3_dir, enc3_btn);
 
-	lv_label_set_text_fmt(label_pwm_iron, "PWM_IRON: %d", pwm_iron);
-	lv_label_set_text_fmt(label_sw_iron, "SW_IRON: %d", sw_iron);
-	lv_label_set_text_fmt(label_sw_air, "SW_AIR: %d PWM: %d", sw_air, dimmer_value[1]);
+	lv_label_set_text_fmt(label_sw_iron, "SW_IRON: %d PWM: %d", sw_iron, pwm_iron);
+	lv_label_set_text_fmt(label_sw_air, "SW_AIR: %d S: %d PWM: %d", sw_air, dimmer_value[0], dimmer_value[1]);
 
 	lv_label_set_text_fmt(label_termopar, "%s", str_termopar_iron);
 	lv_label_set_text_fmt(label_termopar1, "%s", str_termopar_air);
