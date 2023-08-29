@@ -189,7 +189,7 @@ int main(void)
   // PWM
   HAL_TIM_PWM_Start(&htim9, TIM_CHANNEL_1);
   pwm_iron = 0;
-  __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);		// PWM_CH1 = 0 IRON
+  __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, 4095);		// PWM_CH1 = 4095 IRON
   // Start ADC
   idx_flt = 0;
   flt_flag = 0;
@@ -529,9 +529,9 @@ void Zero_Crossing_Int(void)
 
 	isHandled[0] = 0;
 	isHandled[1] = 0;
-	//HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_RESET);
 	//HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
-	//HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_RESET);
 	//htim10.Instance->CNT = 0;
 	//dimmer_Counter[0] = 0;
 	//dimmer_Counter[1] = 0;
@@ -559,11 +559,11 @@ void dimTimerISR(void)
 			if(State[i] == 1) {
 				if(dimmer_Counter[i] > dimmer_value[i] ) {
 					if(i == 0){
-						//HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_SET);
+						HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_SET);
 						//HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
 						pLampState[i] = true;
 					}else if(i  == 1){
-						//HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_SET);
+						HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_SET);
 						pLampState[i] = true;
 					}
 					dimmer_Counter[i] = 0;
