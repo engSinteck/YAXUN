@@ -290,7 +290,7 @@ void screen_debug(void)
     lv_obj_set_style_text_opa(enc_1, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(enc_1, 1, 0);
     lv_obj_set_style_text_line_space(enc_1, 1, 0);
-    lv_label_set_long_mode(enc_1, LV_LABEL_LONG_WRAP);          	// Break the long lines
+    lv_label_set_long_mode(enc_1, LV_LABEL_LONG_WRAP);          // Break the long lines
     lv_label_set_recolor(enc_1, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(enc_1, "ENC1 - %ld  Dir: %ld  Btn: %ld", enc1_cnt, enc1_dir, enc1_btn);
 	lv_obj_set_pos(enc_1, 10, 52);
@@ -301,7 +301,7 @@ void screen_debug(void)
     lv_obj_set_style_text_opa(enc_2, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(enc_2, 1, 0);
     lv_obj_set_style_text_line_space(enc_2, 1, 0);
-    lv_label_set_long_mode(enc_2, LV_LABEL_LONG_WRAP);          	// Break the long lines
+    lv_label_set_long_mode(enc_2, LV_LABEL_LONG_WRAP);          // Break the long lines
     lv_label_set_recolor(enc_2, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(enc_2, "ENC2 - %ld  Dir: %ld Btn: %ld", enc2_cnt, enc2_dir, enc2_btn);
 	lv_obj_set_pos(enc_2, 10, 74);
@@ -312,7 +312,7 @@ void screen_debug(void)
     lv_obj_set_style_text_opa(enc_3, LV_OPA_COVER, LV_PART_MAIN | LV_STATE_DEFAULT);
     lv_obj_set_style_text_letter_space(enc_3, 1, 0);
     lv_obj_set_style_text_line_space(enc_3, 1, 0);
-    lv_label_set_long_mode(enc_3, LV_LABEL_LONG_WRAP);          	// Break the long lines
+    lv_label_set_long_mode(enc_3, LV_LABEL_LONG_WRAP);          // Break the long lines
     lv_label_set_recolor(enc_3, true);                         	// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(enc_3, "ENC3 - %ld  Dir: %ld Btn: %ld ", enc3_cnt, enc3_dir, enc3_btn);
 	lv_obj_set_pos(enc_3, 10, 96);
@@ -346,7 +346,7 @@ void screen_debug(void)
     lv_obj_set_style_text_letter_space(label_sw_iron, 1, 0);
     lv_obj_set_style_text_line_space(label_sw_iron, 1, 0);
     lv_label_set_long_mode(label_sw_iron, LV_LABEL_LONG_WRAP);          	// Break the long lines
-    lv_label_set_recolor(label_sw_iron, true);                         	// Enable re-coloring by commands in the text
+    lv_label_set_recolor(label_sw_iron, true);                         		// Enable re-coloring by commands in the text
 	lv_label_set_text_fmt(label_sw_iron, "SW_IRON: %d PWM: %d", sw_iron, pwm_iron);
 	lv_obj_set_pos(label_sw_iron, 10, 162);
 
