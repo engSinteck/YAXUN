@@ -274,10 +274,10 @@ int main(void)
 	  }
 
 	  // Debug Serial Text
-	  if(HAL_GetTick() - timer_debug > 1000) {
-	  		timer_debug = HAL_GetTick();
-	  		Log_temp_iron();
-	  }
+//	  if(HAL_GetTick() - timer_debug > 1000) {
+//	  		timer_debug = HAL_GetTick();
+//	  		Log_temp_iron();
+//	  }
 
 	  if(HAL_GetTick() - timer_max > 250) {
 		  timer_max = HAL_GetTick();
