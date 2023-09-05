@@ -6,6 +6,8 @@
  */
 
 #include "main.h"
+#include "spi.h"
+#include "tim.h"
 #include "key.h"
 #include "stdio.h"
 #include "string.h"
@@ -14,8 +16,10 @@
 extern volatile uint32_t enc1_btn, enc2_btn, enc3_btn;
 extern volatile uint32_t enc1_cnt, enc2_cnt;
 extern float target_iron, target_air;
+extern uint16_t pwm_iron;
 
 uint8_t flag_screen = 0;
+uint8_t flag_auto_iron = 0;
 
 // Estrututa Botoes
 pushbtn bt[4];
@@ -337,6 +341,16 @@ void KeyboardEvent(void)
 			case EVT_PBTN_INPUT:
 				state_encoder_button(event[1], event[2]);
 				if(event[2] == PBTN_SCLK) {
+					if(event[1] == 2) {
+						if(flag_auto_iron == 1) {
+							flag_auto_iron = 0;
+						}
+						else {
+							flag_auto_iron = 1;
+							pwm_iron = 0;
+							__HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);
+						}
+					}
 				}
 				else if(event[2] == PBTN_LCLK) {
 				}

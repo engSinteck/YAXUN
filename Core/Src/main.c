@@ -116,7 +116,7 @@ void calculate_calibration(void);
 uint32_t map_uint32(uint32_t var, uint32_t x_min, uint32_t x_max, uint32_t y_min, uint32_t y_max);
 int map_dimmer(int var, int x_min, int x_max, int y_min, int y_max);
 void Zero_Crossing_Int(void);
-void dimTimerISR(void);
+void dimmerTimerISR(void);
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -348,7 +348,7 @@ int main(void)
 	  //ADC_MeasurementCorrection();
 
 	  // Controle de Temperatura
-//	  control_temperature_iron();
+	  control_temperature_iron();
 //	  control_temperature_air();
 //	  control_speed_air();
   }
@@ -518,7 +518,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
     {
 		HAL_NVIC_DisableIRQ(EXTI9_5_IRQn);
 		Zero_Crossing_Int();
-		//HAL_GPIO_TogglePin(LED1_GPIO_Port, LED1_Pin);
 		HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
     }
 }
@@ -531,36 +530,17 @@ void Zero_Crossing_Int(void)
 	isHandled[1] = 0;
 	HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_RESET);
-	//HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
-	//htim10.Instance->CNT = 0;
-	//dimmer_Counter[0] = 0;
-	//dimmer_Counter[1] = 0;
-
 	zero_cross = 1;
 }
 
-void dimTimerISR(void)
+void dimmerTimerISR(void)
 {
-/*	for(int i = 0; i < NUM_DIMMERS; i++) {
-		if(pLampState[i] == 1) {
-			if(i == 0){
-				HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
-				HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
-				pLampState[i] = false;
-			}else if(i  == 1){
-				HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_RESET);
-				pLampState[i] = false;
-			}
-		}
-	}
-*/
 	if(zero_cross == 1) {
 		for(int i = 0; i < NUM_DIMMERS; i++) {
 			if(State[i] == 1) {
 				if(dimmer_Counter[i] > dimmer_value[i] ) {
 					if(i == 0){
 						HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_SET);
-						//HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
 						pLampState[i] = true;
 					}else if(i  == 1){
 						HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_SET);
@@ -609,17 +589,13 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		  Key_Read();
 	  }
   }
-  if(htim->Instance == TIM5) {			// 100Khz - 10us
-	  dimTimerISR();
+  if(htim->Instance == TIM5) {			// 12Khz - 84us
+	  dimmerTimerISR();
   }
   if(htim->Instance == TIM10) {			// 120Hz - 8.3334ms
 	  HAL_GPIO_WritePin(RELAY_GPIO_Port, RELAY_Pin, GPIO_PIN_SET);
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
-	  __NOP();
+	  __NOP(); __NOP(); __NOP(); __NOP(); __NOP();
+	  __NOP(); __NOP(); __NOP(); __NOP(); __NOP();
 	  HAL_GPIO_WritePin(RELAY_GPIO_Port, RELAY_Pin, GPIO_PIN_RESET);
   }
 
