@@ -411,10 +411,10 @@ void screen_debug(void)
 
 void update_debug_screen(lv_timer_t * timer)
 {
-	lv_label_set_text_fmt(adc_iron, "ADC8: %ld - %0.1fmV", ADC_iron, (float)(ADC_iron * ((float)3300.0/4095)));
-	lv_label_set_text_fmt(adc_air, "ADC9: %ld - %0.1fmV", ADC_air, (float)(ADC_air * ((float)3300.0/4095)));
+//	lv_label_set_text_fmt(adc_iron, "ADC8: %ld - %0.1fmV", ADC_iron, (float)(ADC_iron * ((float)3300.0/4095)));
+//	lv_label_set_text_fmt(adc_air, "ADC9: %ld - %0.1fmV", ADC_air, (float)(ADC_air * ((float)3300.0/4095)));
 
-	lv_label_set_text_fmt(label_temp_iron, "IRON °C: %0.1f", temperature_K);
+	lv_label_set_text_fmt(label_temp_iron, "IRON °C: %0.2f", temperature_K);
 	lv_label_set_text_fmt(label_temp_air, "AIR °C: %0.1f", temperature_air_K);
 
 	lv_label_set_text_fmt(enc_1, "ENC1 - %ld  Dir: %ld Btn: %ld", enc1_cnt, enc1_dir, enc1_btn);

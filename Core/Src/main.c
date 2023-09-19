@@ -51,7 +51,6 @@
 
 uint16_t adcBuffer[4]; 					// Buffer ADC conversion
 uint8_t buf_tft[ILI9341_SCREEN_WIDTH * 10 * 2];
-//uint8_t buf_tft[ILI9488_SCREEN_WIDTH * 10 * 3];
 
 uint32_t ADC_iron = 0, ADC_air = 0, ADC_temp = 0, ADC_vref = 0;
 uint32_t flt_adc_8[8] ={0};
@@ -62,6 +61,8 @@ uint32_t idx_flt = 0;
 uint32_t flt_flag = 0;
 uint32_t timer_led1 = 0, timer_led2 = 0, timer_led3 = 0, timer_led4 = 0;
 uint32_t timer_lvgl = 0, timer_max = 0, timer_rtc = 0, timer_debug = 0;
+
+uint8_t busySPIDMA = 0;
 
 GPIO_PinState pin_sw_air;
 uint8_t sw_air_low = 0;
@@ -94,6 +95,8 @@ char str_termopar_air[32] = {0};
 float vdda = 0; // Result of VDDA calculation
 float vref = 0; // Result of vref calculation
 float temp_stm, ta, tb; // transfer function using calibration data
+float max_debug[10] = {0.0};
+uint16_t ptrmax = 0;
 
 RTC_TimeTypeDef RTC_Time = {0};
 RTC_DateTypeDef RTC_Date = {0};
@@ -279,26 +282,30 @@ int main(void)
 //	  		Log_temp_iron();
 //	  }
 
-	  if(HAL_GetTick() - timer_max > 250) {
+	  if(HAL_GetTick() - timer_max > 500) {
 		  timer_max = HAL_GetTick();
+		  HAL_Delay(300);
 		  // Temperatura Iron
 		  temp_iron_K = Max6675_Read_Temp(0);
 		  if(TCF_IRON == 0) {
 			  temperature_K = temp_iron_K;
+			  max_debug[ptrmax] = temp_iron_K;
+			  ptrmax++;
+			  if(ptrmax > 10) ptrmax = 0;
 			  sprintf(str_termopar_iron, "Temp(K): %0.2f°C", temperature_K);
 		  }
 		  else {
 			  sprintf(str_termopar_iron, "Temp(K): Not Connected");
 		  }
-		  // Temperatura Air
-		  temp_air_K = Max6675_Read_Temp(1);
-		  if(TCF_AIR == 0) {
-			  temperature_air_K = temp_air_K;
-			  sprintf(str_termopar_air, "Temp(K): %0.2f°C", temperature_air_K);
-		  }
-		  else {
-			  sprintf(str_termopar_air, "Temp(K): Not Connected");
-		  }
+//		  // Temperatura Air
+//		  temp_air_K = Max6675_Read_Temp(1);
+//		  if(TCF_AIR == 0) {
+//			  temperature_air_K = temp_air_K;
+//			  sprintf(str_termopar_air, "Temp(K): %0.2f°C", temperature_air_K);
+//		  }
+//		  else {
+//			  sprintf(str_termopar_air, "Temp(K): Not Connected");
+//		  }
 	  }
 
 	  if(HAL_GetTick() - timer_rtc > 1000) {
@@ -591,12 +598,6 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
   if(htim->Instance == TIM5) {			// 12Khz - 84us
 	  dimmerTimerISR();
-  }
-  if(htim->Instance == TIM10) {			// 120Hz - 8.3334ms
-	  HAL_GPIO_WritePin(RELAY_GPIO_Port, RELAY_Pin, GPIO_PIN_SET);
-	  __NOP(); __NOP(); __NOP(); __NOP(); __NOP();
-	  __NOP(); __NOP(); __NOP(); __NOP(); __NOP();
-	  HAL_GPIO_WritePin(RELAY_GPIO_Port, RELAY_Pin, GPIO_PIN_RESET);
   }
 
   /* USER CODE END Callback 1 */
