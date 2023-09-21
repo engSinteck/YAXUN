@@ -433,3 +433,26 @@ void ILI9341_Flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t 
 
 	lv_disp_flush_ready(disp_drv);                  /* Tell you are ready with the flushing*/
 }
+
+void ILI9341_Flush_dma(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p)
+{
+	int32_t size;
+
+    size = ( ((area->x2 - area->x1) + 1)  * ((area->y2 - area->y1) + 1) );
+    ILI9341_Set_Address(area->x1, area->y1, area->x2, area->y2);
+
+    HAL_GPIO_WritePin(LCD_DC_PORT, LCD_DC_PIN, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_RESET);
+
+    HAL_SPI_Transmit_DMA(HSPI_INSTANCE, (unsigned char*)color_p, (uint16_t)((size-1)*2));
+
+	//HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_SET);
+
+	//lv_disp_flush_ready(disp_drv);                  /* Tell you are ready with the flushing*/
+}
+
+void ILI9341_End_Flush(lv_disp_drv_t * disp_drv)
+{
+	HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_SET);
+	lv_disp_flush_ready(disp_drv);
+}

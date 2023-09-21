@@ -78,5 +78,7 @@ void ILI9341_Draw_Horizontal_Line(uint16_t X, uint16_t Y, uint16_t Width, uint16
 void ILI9341_Draw_Vertical_Line(uint16_t X, uint16_t Y, uint16_t Height, uint16_t Colour);
 
 void ILI9341_Flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p);
+void ILI9341_Flush_dma(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p);
+void ILI9341_End_Flush(lv_disp_drv_t * disp_drv);
 
 #endif /* ILI9341_H_ */

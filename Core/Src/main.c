@@ -50,7 +50,7 @@
 #define MAX_TEMPERATURE		525
 
 uint16_t adcBuffer[4]; 					// Buffer ADC conversion
-uint8_t buf_tft[ILI9341_SCREEN_WIDTH * 10 * 2];
+//uint8_t buf_tft[ILI9341_SCREEN_WIDTH * 10 * 2];
 
 uint32_t ADC_iron = 0, ADC_air = 0, ADC_temp = 0, ADC_vref = 0;
 uint32_t flt_adc_8[8] ={0};
@@ -61,8 +61,6 @@ uint32_t idx_flt = 0;
 uint32_t flt_flag = 0;
 uint32_t timer_led1 = 0, timer_led2 = 0, timer_led3 = 0, timer_led4 = 0;
 uint32_t timer_lvgl = 0, timer_max = 0, timer_rtc = 0, timer_debug = 0;
-
-uint8_t busySPIDMA = 0;
 
 GPIO_PinState pin_sw_air;
 uint8_t sw_air_low = 0;
@@ -109,6 +107,11 @@ int State [NUM_DIMMERS] = { 1, 1 };
 bool pLampState[2]={ false, false };
 volatile int dimmer_Counter[NUM_DIMMERS] = { 0, 0 };
 int dimmer_value[NUM_DIMMERS] = { 0, 0 };
+
+static lv_disp_draw_buf_t draw_buf;
+static lv_color_t buf1[(ILI9341_SCREEN_WIDTH * 10)];                        		// Declare a buffer for 1/10 screen size
+static lv_color_t buf2[(ILI9341_SCREEN_WIDTH * 10)];
+static lv_disp_drv_t disp_drv;        // Descriptor of a display driver
 
 /* USER CODE END PTD */
 
@@ -237,15 +240,10 @@ int main(void)
 
   lv_init();
 
-  static lv_disp_draw_buf_t draw_buf;
-  static lv_color_t buf1[(ILI9341_SCREEN_WIDTH * 10)];                        		// Declare a buffer for 1/10 screen size
-  static lv_color_t buf2[(ILI9341_SCREEN_WIDTH * 10)];                        		// Declare a buffer for 1/10 screen size
   lv_disp_draw_buf_init(&draw_buf, buf1, buf2, (ILI9341_SCREEN_WIDTH * 10) );		// Initialize the display buffer.
-
-  static lv_disp_drv_t disp_drv;        // Descriptor of a display driver
   lv_disp_drv_init(&disp_drv);          // Basic initialization
 
-  disp_drv.flush_cb = ILI9341_Flush;    // Set your driver function
+  disp_drv.flush_cb = ILI9341_Flush_dma;    // Set your driver function
   disp_drv.hor_res = ILI9341_SCREEN_WIDTH;   			// Set the horizontal resolution of the display
   disp_drv.ver_res = ILI9341_SCREEN_HEIGHT;   			// Set the vertical resolution of the display
 
@@ -566,6 +564,13 @@ void dimmerTimerISR(void)
 				}
 			}
 		}
+	}
+}
+
+void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
+{
+	if(hspi->Instance == SPI1) {
+		ILI9341_End_Flush(&disp_drv);
 	}
 }
 /* USER CODE END 4 */
