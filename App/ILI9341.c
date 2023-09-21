@@ -13,8 +13,6 @@
 
 unsigned char burst_buffer[BURST_MAX_SIZE];
 
-extern uint8_t busySPIDMA;
-
 /* Global Variables ------------------------------------------------------------------*/
 volatile uint16_t LCD_HEIGHT = ILI9341_SCREEN_HEIGHT;
 volatile uint16_t LCD_WIDTH	 = ILI9341_SCREEN_WIDTH;
@@ -444,11 +442,8 @@ void ILI9341_Flush_dma(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_colo
     HAL_GPIO_WritePin(LCD_DC_PORT, LCD_DC_PIN, GPIO_PIN_SET);
     HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_RESET);
 
+    while(!__HAL_SPI_GET_FLAG(HSPI_INSTANCE, SPI_FLAG_TXE));
     HAL_SPI_Transmit_DMA(HSPI_INSTANCE, (unsigned char*)color_p, (uint16_t)((size-1)*2));
-
-	//HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_SET);
-
-	//lv_disp_flush_ready(disp_drv);                  /* Tell you are ready with the flushing*/
 }
 
 void ILI9341_End_Flush(lv_disp_drv_t * disp_drv)

@@ -22,7 +22,7 @@ void write_max31856(uint8_t addr, uint8_t dt)
 {
 	TxBuffer[0] = addr;
 	TxBuffer[1] = dt;
-	cs_strobe();
+	cs_set();
 	HAL_SPI_Transmit(&hspi1, &TxBuffer[0], 1, TIMEOUTVAL);
 	while(HAL_SPI_GetState(&hspi1) != HAL_SPI_STATE_READY);
 	HAL_SPI_Transmit(&hspi1, &TxBuffer[1], 1, TIMEOUTVAL);
