@@ -241,20 +241,20 @@ int main(void)
   lv_init();
 
   lv_disp_draw_buf_init(&draw_buf, buf1, buf2, (ILI9341_SCREEN_WIDTH * 10) );		// Initialize the display buffer.
-  lv_disp_drv_init(&disp_drv);          // Basic initialization
+  lv_disp_drv_init(&disp_drv);          				// Basic initialization
 
-  disp_drv.flush_cb = ILI9341_Flush_dma;    // Set your driver function
+  disp_drv.flush_cb = ILI9341_Flush_dma;    			// Set your driver function
   disp_drv.hor_res = ILI9341_SCREEN_WIDTH;   			// Set the horizontal resolution of the display
   disp_drv.ver_res = ILI9341_SCREEN_HEIGHT;   			// Set the vertical resolution of the display
 
-  //disp_drv.flush_cb = ILI9488_Flush;	//Set your driver function
+  //disp_drv.flush_cb = ILI9488_Flush;					//Set your driver function
   //disp_drv.hor_res = ILI9488_SCREEN_WIDTH;   			// Set the horizontal resolution of the display
-  //disp_drv.ver_res = ILI9488_SCREEN_HEIGHT;   			// Set the vertical resolution of the display
+  //disp_drv.ver_res = ILI9488_SCREEN_HEIGHT;   		// Set the vertical resolution of the display
 
-  disp_drv.draw_buf   = &draw_buf;        // Assign the buffer to the display
+  disp_drv.draw_buf   = &draw_buf;        				// Assign the buffer to the display
   disp_drv.rotated    = LV_DISP_ROT_90;
   disp_drv.sw_rotate  = 1;
-  lv_disp_drv_register(&disp_drv);      // Finally register the driver
+  lv_disp_drv_register(&disp_drv);      				// Finally register the driver
 
   screen_main();
   screen_debug();
@@ -497,7 +497,6 @@ void calculate_calibration(void)
     // Simple linear equation y = ax + b based on two points
     ta = (float) ((y2 - y1) / (x2 - x1));
     tb = (float) ((x2 * y1 - x1 * y2) / (x2 - x1));
-
 }
 
 uint32_t map_uint32(uint32_t var, uint32_t x_min, uint32_t x_max, uint32_t y_min, uint32_t y_max)
@@ -519,7 +518,7 @@ int map_dimmer(int var, int x_min, int x_max, int y_min, int y_max)
 // EXTI Line9 External Interrupt ISR Handler CallBackFun
 void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 {
-    if(GPIO_Pin == ZERO_CROSS_Pin) // If The INT Source Is EXTI Line7 (B7 Pin)
+    if(GPIO_Pin == ZERO_CROSS_Pin) 				// If The INT Source Is EXTI Line7 (B7 Pin)
     {
 		HAL_NVIC_DisableIRQ(EXTI9_5_IRQn);
 		Zero_Crossing_Int();
