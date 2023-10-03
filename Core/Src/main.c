@@ -603,6 +603,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if(htim->Instance == TIM5) {			// 12Khz - 84us
 	  dimmerTimerISR();
   }
+  if(htim->Instance == TIM10) {			// 120Hz - 8.33ms
+
+  }
 
   /* USER CODE END Callback 1 */
 }
