@@ -107,6 +107,19 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN Private defines */
 #define FLOAT_TO_INT(x) ((x)>=0?(int)((x)+0.5):(int)((x)-0.5))
+
+typedef enum {
+  Incremented = 1,
+  Decremented = -1,
+  Neutral = 0,
+} Encoder_Status;
+
+typedef struct {
+	uint32_t cnt;
+	uint32_t val;
+	uint32_t dir;
+} encoder;
+
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

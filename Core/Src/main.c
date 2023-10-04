@@ -44,6 +44,8 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
+Encoder_Status Encoder_Get_Status(TIM_HandleTypeDef htimer);
+
 #define DEBOUNCE_SW 		50
 #define NUM_DIMMERS 		2
 #define MAX_DIMMER_VALUE	832
@@ -100,14 +102,22 @@ uint16_t ptrmax = 0;
 RTC_TimeTypeDef RTC_Time = {0};
 RTC_DateTypeDef RTC_Date = {0};
 
+Encoder_Status encoderStatus_1;
+Encoder_Status encoderStatus_2;
+Encoder_Status encoderStatus_3;
+encoder rot1;
+encoder rot2;
+encoder rot3;
+uint16_t newCount, prevCount;
+
 int NumActiveChannels = NUM_DIMMERS;
 volatile bool zero_cross = 0;
 volatile int NumHandled = 0;
 volatile bool isHandled[NUM_DIMMERS] = { 0, 0 };
 int State [NUM_DIMMERS] = { 1, 1 };
 bool pLampState[2]={ false, false };
-volatile int dimmer_Counter[NUM_DIMMERS] = { 0, 0 };
-int dimmer_value[NUM_DIMMERS] = { 0, 0 };
+volatile uint32_t dimmer_Counter[NUM_DIMMERS] = { 0, 0 };
+uint32_t dimmer_value[NUM_DIMMERS] = { 0, 0 };
 
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf1[(ILI9341_SCREEN_WIDTH * 10)];                        		// Declare a buffer for 1/10 screen size
@@ -202,6 +212,30 @@ int main(void)
   flt_flag = 0;
   calculate_calibration();
   HAL_ADC_Start_DMA(&hadc1, (uint32_t*)adcBuffer, 4);	// Start ADC in DMA
+
+  dimmer_Counter[0] = 0;
+  dimmer_Counter[1] = 0;
+  dimmer_value[0] = 0;
+  dimmer_value[1] = 0;
+
+  enc1_dir = 0;
+  enc1_cnt = 0;
+  enc1_val = 0;
+  enc1_last = 0;
+
+  enc2_dir = 0;
+  enc2_cnt = 0;
+  enc2_val = 0;
+  enc2_last = 0;
+
+  enc3_dir = 0;
+  enc3_cnt = 0;
+  enc3_val = 0;
+  enc3_last = 0;
+
+  rot1.cnt = 0;
+  rot2.cnt = 0;
+  rot3.cnt = 0;
 
   // Init Flash
   W25qxx_Init();
@@ -315,40 +349,91 @@ int main(void)
 
 	  // Encoder 1
 	  enc1_cnt = TIM1->CNT >> 2;         //htim1.Instance->CNT >> 2;
-	  enc1_val = __HAL_TIM_GET_COUNTER(&htim1);
+	  enc1_val = __HAL_TIM_GET_COUNTER(&htim1) >> 2;
 	  enc1_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim1));
 
-	  if(enc1_cnt != enc1_last) {
-		  target_speed = enc1_cnt;
-		  dimmer_value[1] = enc1_cnt;
-		  enc1_last  = enc1_cnt;
+	  if(enc1_val != enc1_last) {
+		  //target_speed = enc1_val;
+		  //dimmer_value[1] = enc1_val;
+		  enc1_last  = enc1_val;
 	  }
 
 	  // Encoder 2
-	  enc2_cnt = TIM3->CNT >> 2;              //htim3.Instance->CNT >> 2;
-	  enc2_val = __HAL_TIM_GET_COUNTER(&htim3);
-	  enc2_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3));
+	  enc2_cnt = TIM2->CNT >> 2;              //htim2.Instance->CNT >> 2;
+	  enc2_val = __HAL_TIM_GET_COUNTER(&htim2) >> 2;
+	  enc2_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim2));
 
-	  if(enc2_cnt != enc2_last) {
-		  target_air = (float)enc2_cnt;
-		  dimmer_value[0] = enc2_cnt;
-		  enc2_last = enc2_cnt;
+	  if(enc2_val != enc2_last) {
+		  //target_air = (float)enc2_val;
+		  //dimmer_value[0] = enc2_val;
+		  enc2_last = enc2_val;
 	  }
 
 	  // Encoder 3
-	  enc3_cnt = TIM2->CNT >> 2;                  //htim2.Instance->CNT >> 2;
-	  enc3_val = __HAL_TIM_GET_COUNTER(&htim2);
-	  enc3_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim2));
+	  enc3_cnt = TIM3->CNT >> 2;                  //htim3.Instance->CNT >> 2;
+	  enc3_val = __HAL_TIM_GET_COUNTER(&htim3) >> 2;
+	  enc3_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3));
 
-	  if(enc3_cnt != enc3_last) {
-	  	  target_iron = enc3_cnt;
-	  	  enc3_last = enc3_cnt;
+	  if(enc3_val != enc3_last) {
+	  	  //target_iron = enc3_val;
+	  	  enc3_last = enc3_val;
 	  }
 
 	  if(enc3_cnt != pwm_iron) {
-		  pwm_iron = enc3_val;
-		  __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);	// PWM_CH1 = 0 IRON
+		  //pwm_iron = enc3_val;
+		  //__HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);	// PWM_CH1 = 0 IRON
 	  }
+
+	  encoderStatus_1 = Encoder_Get_Status(htim1);
+	  switch(encoderStatus_1)
+	  {
+	      case Incremented:
+	        // do something
+	    	rot1.cnt++;
+	        break;
+	      case Decremented:
+	        // do something else
+	    	if(rot1.cnt >= 1)
+	    		rot1.cnt--;
+	    	break;
+	      case Neutral:
+	        // don't do anything
+	        break;
+	  }
+	  //
+	  encoderStatus_2 = Encoder_Get_Status(htim2);
+	  switch(encoderStatus_2)
+	  {
+	      case Incremented:
+	        // do something
+	    	rot2.cnt++;
+	        break;
+	      case Decremented:
+	        // do something else
+	    	if(rot2.cnt >= 1)
+	    		rot2.cnt--;
+	    	break;
+	      case Neutral:
+	        // don't do anything
+	        break;
+	  }//
+	  encoderStatus_3 = Encoder_Get_Status(htim3);
+	  switch(encoderStatus_3)
+	  {
+	      case Incremented:
+	        // do something
+	    	rot3.cnt++;
+	        break;
+	      case Decremented:
+	        // do something else
+	    	if(rot3.cnt >= 1)
+	    		rot3.cnt--;
+	    	break;
+	      case Neutral:
+	        // don't do anything
+	        break;
+	  }
+
 
 	  // Buttons Encoders
 	  KeyboardEvent();
@@ -579,6 +664,27 @@ void HAL_SPI_TxCpltCallback(SPI_HandleTypeDef *hspi)
 		ILI9341_End_Flush(&disp_drv);
 	}
 }
+
+uint16_t Encoder_Read(TIM_HandleTypeDef htimer)
+{
+  uint16_t val = __HAL_TIM_GET_COUNTER(&htimer);
+  return val >> 1;
+}
+
+Encoder_Status Encoder_Get_Status(TIM_HandleTypeDef htimer)
+{
+	newCount = Encoder_Read(htimer);
+	if (newCount != prevCount) {
+		if (newCount > prevCount) {
+			prevCount = newCount;
+			return Incremented;
+		} else {
+			prevCount = newCount;
+			return Decremented;
+		}
+	}
+	return Neutral;
+}
 /* USER CODE END 4 */
 
 /**
@@ -612,10 +718,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
   if(htim->Instance == TIM10) {			// 120Hz - 8.33ms
 	  HAL_GPIO_WritePin(RELAY_GPIO_Port,RELAY_Pin, GPIO_PIN_SET);
-	  __NOP(); __NOP(); __NOP(); __NOP(); __NOP();
-	  __NOP(); __NOP(); __NOP(); __NOP(); __NOP();
-	  __NOP(); __NOP(); __NOP(); __NOP(); __NOP();
-	  __NOP(); __NOP(); __NOP(); __NOP(); __NOP();
+	  for(uint16_t u = 0; u < 300; u++) {
+		  __NOP();
+	  }
 	  HAL_GPIO_WritePin(RELAY_GPIO_Port,RELAY_Pin, GPIO_PIN_RESET);
   }
 

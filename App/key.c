@@ -217,7 +217,6 @@ void KeyboardRead(uint8_t key)
 	bt[key]->old_state = bt[key]->new_state;
 }
 
-
 uint8_t PushButton_Read(uint8_t key)
 {
 	uint8_t ret = 0x00;
