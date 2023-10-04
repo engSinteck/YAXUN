@@ -14,8 +14,8 @@
 #define SSPORT1 CS_MAX_GPIO_Port       	// GPIO Port of Chip Select(Slave Select)
 #define SSPIN1  CS_MAX_Pin  				// GPIO PIN  of Chip Select(Slave Select)
 
-#define SSPORT2 CS_MAX_GPIO_Port       	// GPIO Port of Chip Select(Slave Select)
-#define SSPIN2  CS_MAX_Pin  				// GPIO PIN  of Chip Select(Slave Select)
+#define SSPORT2 LED2_GPIO_Port       	// GPIO Port of Chip Select(Slave Select)
+#define SSPIN2  LED2_Pin  				// GPIO PIN  of Chip Select(Slave Select)
 // ------------------------- Functions  ----------------------
 
 float Max6675_Read_Temp(uint8_t channel);

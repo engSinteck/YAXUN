@@ -76,9 +76,10 @@ volatile uint32_t timer_key = 0;
 
 float adc_ch8, adc_ch9;
 
-volatile uint32_t enc1_cnt=0, enc1_dir=0, enc1_btn=0;
-volatile uint32_t enc2_cnt=0, enc2_dir=0, enc2_btn=0;
-volatile uint32_t enc3_cnt=0, enc3_dir=0, enc3_btn=0;
+volatile uint32_t enc1_cnt=0, enc1_last=0, enc1_dir=0, enc1_btn=0;
+volatile uint32_t enc2_cnt=0, enc2_last=0, enc2_dir=0, enc2_btn=0;
+volatile uint32_t enc3_cnt=0, enc3_last=0, enc3_dir=0, enc3_btn=0;
+volatile uint16_t enc1_val=0, enc2_val=0, enc3_val=0;
 
 uint32_t target_speed;
 float target_iron, target_air;
@@ -210,8 +211,8 @@ int main(void)
   // LED-2 - REPOUSO
   // LED-3 - OPERATE
   // LED-4 - PWM IRON
-  HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(RELAY_GPIO_Port,RELAY_Pin, GPIO_PIN_RESET);
   HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
   HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
@@ -295,15 +296,15 @@ int main(void)
 		  else {
 			  sprintf(str_termopar_iron, "Temp(K): Not Connected");
 		  }
-//		  // Temperatura Air
-//		  temp_air_K = Max6675_Read_Temp(1);
-//		  if(TCF_AIR == 0) {
-//			  temperature_air_K = temp_air_K;
-//			  sprintf(str_termopar_air, "Temp(K): %0.2f°C", temperature_air_K);
-//		  }
-//		  else {
-//			  sprintf(str_termopar_air, "Temp(K): Not Connected");
-//		  }
+		  // Temperatura Air
+		  temp_air_K = Max6675_Read_Temp(1);
+		  if(TCF_AIR == 0) {
+			  temperature_air_K = temp_air_K;
+			  sprintf(str_termopar_air, "Temp(K): %0.2f°C", temperature_air_K);
+		  }
+		  else {
+			  sprintf(str_termopar_air, "Temp(K): Not Connected");
+		  }
 	  }
 
 	  if(HAL_GetTick() - timer_rtc > 1000) {
@@ -313,33 +314,39 @@ int main(void)
 	  }
 
 	  // Encoder 1
-	  enc1_cnt = htim1.Instance->CNT >> 2;
+	  enc1_cnt = TIM1->CNT >> 2;         //htim1.Instance->CNT >> 2;
+	  enc1_val = __HAL_TIM_GET_COUNTER(&htim1);
 	  enc1_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim1));
 
-	  if(enc1_cnt != target_speed) {
-		  target_speed = map_uint32(enc1_cnt, 0, 1023, 0, 100);
-		  dimmer_value[1] = map_dimmer(enc1_cnt, 0, 1023, 0, MAX_DIMMER_VALUE);
+	  if(enc1_cnt != enc1_last) {
+		  target_speed = enc1_cnt;
+		  dimmer_value[1] = enc1_cnt;
+		  enc1_last  = enc1_cnt;
 	  }
 
 	  // Encoder 2
-	  enc2_cnt = htim3.Instance->CNT >> 2;
+	  enc2_cnt = TIM3->CNT >> 2;              //htim3.Instance->CNT >> 2;
+	  enc2_val = __HAL_TIM_GET_COUNTER(&htim3);
 	  enc2_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3));
 
-	  if(enc2_cnt != FLOAT_TO_INT(target_air)) {
-		  target_air = (float)map_uint32(enc2_cnt, 0, 1023, 0, MAX_TEMPERATURE);
-		  dimmer_value[0] = map_dimmer(enc2_cnt, 0, 1023, 0, MAX_DIMMER_VALUE);
+	  if(enc2_cnt != enc2_last) {
+		  target_air = (float)enc2_cnt;
+		  dimmer_value[0] = enc2_cnt;
+		  enc2_last = enc2_cnt;
 	  }
 
 	  // Encoder 3
-	  enc3_cnt = htim2.Instance->CNT >> 2;
+	  enc3_cnt = TIM2->CNT >> 2;                  //htim2.Instance->CNT >> 2;
+	  enc3_val = __HAL_TIM_GET_COUNTER(&htim2);
 	  enc3_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim2));
 
-	  if(enc3_cnt != FLOAT_TO_INT(target_iron)) {
-	  	  target_iron = (float)map_uint32(enc3_cnt, 0, 4095, 0, MAX_TEMPERATURE);
+	  if(enc3_cnt != enc3_last) {
+	  	  target_iron = enc3_cnt;
+	  	  enc3_last = enc3_cnt;
 	  }
 
 	  if(enc3_cnt != pwm_iron) {
-		  pwm_iron = (uint16_t) enc3_cnt;
+		  pwm_iron = enc3_val;
 		  __HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);	// PWM_CH1 = 0 IRON
 	  }
 
@@ -353,7 +360,7 @@ int main(void)
 	  //ADC_MeasurementCorrection();
 
 	  // Controle de Temperatura
-	  control_temperature_iron();
+//	  control_temperature_iron();
 //	  control_temperature_air();
 //	  control_speed_air();
   }
@@ -604,7 +611,12 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 	  dimmerTimerISR();
   }
   if(htim->Instance == TIM10) {			// 120Hz - 8.33ms
-
+	  HAL_GPIO_WritePin(RELAY_GPIO_Port,RELAY_Pin, GPIO_PIN_SET);
+	  __NOP(); __NOP(); __NOP(); __NOP(); __NOP();
+	  __NOP(); __NOP(); __NOP(); __NOP(); __NOP();
+	  __NOP(); __NOP(); __NOP(); __NOP(); __NOP();
+	  __NOP(); __NOP(); __NOP(); __NOP(); __NOP();
+	  HAL_GPIO_WritePin(RELAY_GPIO_Port,RELAY_Pin, GPIO_PIN_RESET);
   }
 
   /* USER CODE END Callback 1 */

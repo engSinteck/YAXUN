@@ -18,6 +18,7 @@ extern uint32_t ADC_iron, ADC_air;
 extern volatile uint32_t enc1_cnt, enc1_dir, enc1_btn;
 extern volatile uint32_t enc2_cnt, enc2_dir, enc2_btn;
 extern volatile uint32_t enc3_cnt, enc3_dir, enc3_btn;
+extern volatile uint16_t enc1_val, enc2_val, enc3_val;
 extern volatile uint8_t sw_air, sw_iron;
 extern uint32_t target_speed;
 extern float temperature_iron, temperature_air;
@@ -292,7 +293,7 @@ void screen_debug(void)
     lv_obj_set_style_text_line_space(enc_1, 1, 0);
     lv_label_set_long_mode(enc_1, LV_LABEL_LONG_WRAP);          // Break the long lines
     lv_label_set_recolor(enc_1, true);                         	// Enable re-coloring by commands in the text
-	lv_label_set_text_fmt(enc_1, "ENC1 - %ld  Dir: %ld  Btn: %ld", enc1_cnt, enc1_dir, enc1_btn);
+	lv_label_set_text_fmt(enc_1, "E1 - %ld  D: %ld B: %ld V: %d", enc1_cnt, enc1_dir, enc1_btn, enc1_val);
 	lv_obj_set_pos(enc_1, 10, 52);
 	//
     enc_2 = lv_label_create(Tela_Debug);
@@ -303,7 +304,7 @@ void screen_debug(void)
     lv_obj_set_style_text_line_space(enc_2, 1, 0);
     lv_label_set_long_mode(enc_2, LV_LABEL_LONG_WRAP);          // Break the long lines
     lv_label_set_recolor(enc_2, true);                         	// Enable re-coloring by commands in the text
-	lv_label_set_text_fmt(enc_2, "ENC2 - %ld  Dir: %ld Btn: %ld", enc2_cnt, enc2_dir, enc2_btn);
+	lv_label_set_text_fmt(enc_2, "E2 - %ld  D: %ld B: %ld V: %d", enc2_cnt, enc2_dir, enc2_btn, enc2_val);
 	lv_obj_set_pos(enc_2, 10, 74);
 	//
     enc_3 = lv_label_create(Tela_Debug);
@@ -314,7 +315,7 @@ void screen_debug(void)
     lv_obj_set_style_text_line_space(enc_3, 1, 0);
     lv_label_set_long_mode(enc_3, LV_LABEL_LONG_WRAP);          // Break the long lines
     lv_label_set_recolor(enc_3, true);                         	// Enable re-coloring by commands in the text
-	lv_label_set_text_fmt(enc_3, "ENC3 - %ld  Dir: %ld Btn: %ld ", enc3_cnt, enc3_dir, enc3_btn);
+	lv_label_set_text_fmt(enc_3, "E3 - %ld  D: %ld B: %ld V: %d", enc3_cnt, enc3_dir, enc3_btn, enc3_val);
 	lv_obj_set_pos(enc_3, 10, 96);
 
 	label_temp_iron = lv_label_create(Tela_Debug);
@@ -417,9 +418,9 @@ void update_debug_screen(lv_timer_t * timer)
 	lv_label_set_text_fmt(label_temp_iron, "IRON °C: %0.2f", temperature_K);
 	lv_label_set_text_fmt(label_temp_air, "AIR °C: %0.1f", temperature_air_K);
 
-	lv_label_set_text_fmt(enc_1, "ENC1 - %ld  Dir: %ld Btn: %ld", enc1_cnt, enc1_dir, enc1_btn);
-	lv_label_set_text_fmt(enc_2, "ENC2 - %ld  Dir: %ld Btn: %ld", enc2_cnt, enc2_dir, enc2_btn);
-	lv_label_set_text_fmt(enc_3, "ENC3 - %ld  Dir: %ld Btn: %ld", enc3_cnt, enc3_dir, enc3_btn);
+	lv_label_set_text_fmt(enc_1, "E1 - %ld  D: %ld B: %ld V: %d", enc1_cnt, enc1_dir, enc1_btn, enc1_val);
+	lv_label_set_text_fmt(enc_2, "E2 - %ld  D: %ld B: %ld V: %d", enc2_cnt, enc2_dir, enc2_btn, enc2_val);
+	lv_label_set_text_fmt(enc_3, "E3 - %ld  D: %ld B: %ld V: %d", enc3_cnt, enc3_dir, enc3_btn, enc3_val);
 
 	lv_label_set_text_fmt(label_sw_iron, "SW_IRON: %d PWM: %d", sw_iron, pwm_iron);
 	lv_label_set_text_fmt(label_sw_air, "SW_AIR: %d S: %d PWM: %d", sw_air, dimmer_value[0], dimmer_value[1]);
