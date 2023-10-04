@@ -45,6 +45,7 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 Encoder_Status Encoder_Get_Status(TIM_HandleTypeDef htimer);
+void delay_us (uint16_t us);
 
 #define DEBOUNCE_SW 		50
 #define NUM_DIMMERS 		2
@@ -197,7 +198,9 @@ int main(void)
   MX_TIM2_Init();
   MX_TIM5_Init();
   MX_TIM10_Init();
+  MX_TIM4_Init();
   /* USER CODE BEGIN 2 */
+  HAL_TIM_Base_Start_IT(&htim4);
   HAL_TIM_Base_Start_IT(&htim5);
   HAL_TIM_Base_Start_IT(&htim10);
   HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);
@@ -685,6 +688,12 @@ Encoder_Status Encoder_Get_Status(TIM_HandleTypeDef htimer)
 	}
 	return Neutral;
 }
+
+void delay_us (uint16_t us)
+{
+	__HAL_TIM_SET_COUNTER(&htim4, 0);  				// set the counter value a 0
+	while (__HAL_TIM_GET_COUNTER(&htim4) < us);  	// wait for the counter to reach the us input in the parameter
+}
 /* USER CODE END 4 */
 
 /**
@@ -712,6 +721,9 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 		  timer_key = 0;
 		  Key_Read();
 	  }
+  }
+  if(htim->Instance == TIM4) {			// 1us
+
   }
   if(htim->Instance == TIM5) {			// 12Khz - 84us
 	  dimmerTimerISR();
