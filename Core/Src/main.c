@@ -49,7 +49,6 @@ void delay_us (uint16_t us);
 
 #define DEBOUNCE_SW 		50
 #define NUM_DIMMERS 		2
-#define MAX_DIMMER_VALUE	832
 #define MAX_TEMPERATURE		525
 
 uint16_t adcBuffer[4]; 					// Buffer ADC conversion
@@ -82,7 +81,7 @@ float adc_ch8, adc_ch9;
 volatile uint32_t enc1_cnt=0, enc1_last=0, enc1_dir=0, enc1_btn=0;
 volatile uint32_t enc2_cnt=0, enc2_last=0, enc2_dir=0, enc2_btn=0;
 volatile uint32_t enc3_cnt=0, enc3_last=0, enc3_dir=0, enc3_btn=0;
-volatile uint16_t enc1_val=0, enc2_val=0, enc3_val=0;
+volatile uint32_t enc1_val=0, enc2_val=0, enc3_val=0;
 
 uint32_t target_speed;
 float target_iron, target_air;
@@ -117,8 +116,9 @@ volatile int NumHandled = 0;
 volatile bool isHandled[NUM_DIMMERS] = { 0, 0 };
 int State [NUM_DIMMERS] = { 1, 1 };
 bool pLampState[2]={ false, false };
-volatile uint32_t dimmer_Counter[NUM_DIMMERS] = { 0, 0 };
-uint32_t dimmer_value[NUM_DIMMERS] = { 0, 0 };
+uint32_t dimmer_Counter[NUM_DIMMERS] = { 0, 0 };
+uint32_t dimmer_value[NUM_DIMMERS]   = { 0, 0 };
+uint32_t dimmer_max[NUM_DIMMERS]     = { 0, 0 };
 
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf1[(ILI9341_SCREEN_WIDTH * 10)];                        		// Declare a buffer for 1/10 screen size
@@ -220,6 +220,8 @@ int main(void)
   dimmer_Counter[1] = 0;
   dimmer_value[0] = 0;
   dimmer_value[1] = 0;
+  dimmer_max[0] = 0;
+  dimmer_max[1] = 0;
 
   enc1_dir = 0;
   enc1_cnt = 0;
@@ -351,92 +353,38 @@ int main(void)
 	  }
 
 	  // Encoder 1
-	  enc1_cnt = TIM1->CNT >> 2;         //htim1.Instance->CNT >> 2;
-	  enc1_val = __HAL_TIM_GET_COUNTER(&htim1) >> 2;
+	  enc1_cnt = htim1.Instance->CNT >> 2;
 	  enc1_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim1));
 
-	  if(enc1_val != enc1_last) {
-		  //target_speed = enc1_val;
-		  //dimmer_value[1] = enc1_val;
-		  enc1_last  = enc1_val;
+	  if(enc1_cnt != enc1_last) {
+		  enc1_last  = enc1_cnt;
 	  }
 
 	  // Encoder 2
-	  enc2_cnt = TIM2->CNT >> 2;              //htim2.Instance->CNT >> 2;
-	  enc2_val = __HAL_TIM_GET_COUNTER(&htim2) >> 2;
+	  enc2_cnt = htim2.Instance->CNT >> 2;
 	  enc2_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim2));
 
-	  if(enc2_val != enc2_last) {
-		  //target_air = (float)enc2_val;
-		  //dimmer_value[0] = enc2_val;
-		  enc2_last = enc2_val;
+	  if(enc2_cnt != enc2_last) {
+		  enc2_last = enc2_cnt;
 	  }
 
 	  // Encoder 3
-	  enc3_cnt = TIM3->CNT >> 2;                  //htim3.Instance->CNT >> 2;
-	  enc3_val = __HAL_TIM_GET_COUNTER(&htim3) >> 2;
+	  enc3_cnt = htim3.Instance->CNT >> 2;
 	  enc3_dir = !(__HAL_TIM_IS_TIM_COUNTING_DOWN(&htim3));
 
-	  if(enc3_val != enc3_last) {
-	  	  //target_iron = enc3_val;
-	  	  enc3_last = enc3_val;
+	  if(enc3_cnt != enc3_last) {
+	  	  enc3_last = enc3_cnt;
 	  }
 
-	  if(enc3_cnt != pwm_iron) {
-		  //pwm_iron = enc3_val;
-		  //__HAL_TIM_SetCompare(&htim9, TIM_CHANNEL_1, pwm_iron);	// PWM_CH1 = 0 IRON
-	  }
+	  if(enc1_last != dimmer_value[0])
+		  dimmer_value[0] = enc1_last;
 
-	  encoderStatus_1 = Encoder_Get_Status(htim1);
-	  switch(encoderStatus_1)
-	  {
-	      case Incremented:
-	        // do something
-	    	rot1.cnt++;
-	        break;
-	      case Decremented:
-	        // do something else
-	    	if(rot1.cnt >= 1)
-	    		rot1.cnt--;
-	    	break;
-	      case Neutral:
-	        // don't do anything
-	        break;
-	  }
-	  //
-	  encoderStatus_2 = Encoder_Get_Status(htim2);
-	  switch(encoderStatus_2)
-	  {
-	      case Incremented:
-	        // do something
-	    	rot2.cnt++;
-	        break;
-	      case Decremented:
-	        // do something else
-	    	if(rot2.cnt >= 1)
-	    		rot2.cnt--;
-	    	break;
-	      case Neutral:
-	        // don't do anything
-	        break;
-	  }//
-	  encoderStatus_3 = Encoder_Get_Status(htim3);
-	  switch(encoderStatus_3)
-	  {
-	      case Incremented:
-	        // do something
-	    	rot3.cnt++;
-	        break;
-	      case Decremented:
-	        // do something else
-	    	if(rot3.cnt >= 1)
-	    		rot3.cnt--;
-	    	break;
-	      case Neutral:
-	        // don't do anything
-	        break;
-	  }
+	  if(enc2_last != dimmer_value[1])
+		  if(enc2_last > 0 && enc2_last <= 4095)
+			  pwm_iron = enc2_last;
 
+	  if(enc3_last != pwm_iron)
+		  dimmer_value[1] = enc3_last;
 
 	  // Buttons Encoders
 	  KeyboardEvent();
@@ -627,9 +575,9 @@ void Zero_Crossing_Int(void)
 
 	isHandled[0] = 0;
 	isHandled[1] = 0;
+	zero_cross = 1;
 	HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_RESET);
-	zero_cross = 1;
 }
 
 void dimmerTimerISR(void)
@@ -655,6 +603,8 @@ void dimmerTimerISR(void)
 				}
 				else if(isHandled[i] == 0) {
 					dimmer_Counter[i]++;
+					if(dimmer_Counter[i] > dimmer_max[i])
+						dimmer_max[i] = dimmer_Counter[i];
 				}
 			}
 		}
