@@ -420,19 +420,19 @@ void screen_debug(void)
 void update_debug_screen(lv_timer_t * timer)
 {
 	lv_label_set_text_fmt(adc_iron, "D0: %ld - %ld - %ld", dimmer_value[0], dimmer_Counter[0], dimmer_max[0] );
-	lv_label_set_text_fmt(adc_air, "D1: %ld - %ld - %ld", dimmer_value[1], dimmer_Counter[1], dimmer_max[1] );
+	lv_label_set_text_fmt(adc_air , "D1: %ld - %ld - %ld", dimmer_value[1], dimmer_Counter[1], dimmer_max[1] );
 
 	lv_label_set_text_fmt(label_temp_iron, "IRON °C: %0.2f", temperature_K);
-	lv_label_set_text_fmt(label_temp_air, "AIR °C: %0.1f", temperature_air_K);
+	lv_label_set_text_fmt(label_temp_air , "AIR  °C: %0.1f", temperature_air_K);
 
 	lv_label_set_text_fmt(enc_1, "E1 - %ld  D: %ld B: %ld V: %ld", enc1_cnt, enc1_dir, enc1_btn, enc1_last);
 	lv_label_set_text_fmt(enc_2, "E2 - %ld  D: %ld B: %ld V: %ld", enc2_cnt, enc2_dir, enc2_btn, enc2_last);
 	lv_label_set_text_fmt(enc_3, "E3 - %ld  D: %ld B: %ld V: %ld", enc3_cnt, enc3_dir, enc3_btn, enc3_last);
 
 	lv_label_set_text_fmt(label_sw_iron, "SW_IRON: %d PWM: %d", sw_iron, pwm_iron);
-	lv_label_set_text_fmt(label_sw_air, "SW_AIR: %d S: %ld PWM: %ld", sw_air, dimmer_value[0], dimmer_value[1]);
+	lv_label_set_text_fmt(label_sw_air , "SW_AIR : %d S: %ld PWM: %ld", sw_air, dimmer_value[0], dimmer_value[1]);
 
-	lv_label_set_text_fmt(label_termopar, "%s", str_termopar_iron);
+	lv_label_set_text_fmt(label_termopar,  "%s", str_termopar_iron);
 	lv_label_set_text_fmt(label_termopar1, "%s", str_termopar_air);
 	lv_label_set_text_fmt(label_power, "uC V:%0.2f  VR:%0.2f T:%0.1f", vdda, vref, temp_stm);
 	lv_label_set_text_fmt(label_clock, "Time: %02d:%02d:%02d",RTC_Time.Hours,RTC_Time.Minutes,RTC_Time.Seconds);
