@@ -52,7 +52,6 @@ void delay_us (uint16_t us);
 #define MAX_TEMPERATURE		525
 
 uint16_t adcBuffer[4]; 					// Buffer ADC conversion
-//uint8_t buf_tft[ILI9341_SCREEN_WIDTH * 10 * 2];
 
 uint32_t ADC_iron = 0, ADC_air = 0, ADC_temp = 0, ADC_vref = 0;
 uint32_t flt_adc_8[8] ={0};
@@ -484,9 +483,6 @@ void debounce_input(void)
 
 void HAL_ADC_ConvCpltCallback(ADC_HandleTypeDef* hadc)
 {
-	//ADC_iron = (uint32_t)adcBuffer[0];
-	//ADC_air  = (uint32_t)adcBuffer[1];
-
 	flt_adc_8[idx_flt] = (uint32_t)adcBuffer[0];
 	flt_adc_9[idx_flt] = (uint32_t)adcBuffer[1];
 	flt_adc_t[idx_flt] = (uint32_t)adcBuffer[2];
