@@ -112,8 +112,10 @@ uint16_t newCount, prevCount;
 int NumActiveChannels = NUM_DIMMERS;
 volatile bool zero_cross = 0;
 volatile int NumHandled = 0;
+volatile uint32_t dimmer_cnt = 0;
+volatile uint32_t dimmer_cnt_max = 0;
 volatile bool isHandled[NUM_DIMMERS] = { 0, 0 };
-int State [NUM_DIMMERS] = { 1, 1 };
+uint8_t State [NUM_DIMMERS] = { 1, 1 };
 bool pLampState[2]={ false, false };
 uint32_t dimmer_Counter[NUM_DIMMERS] = { 0, 0 };
 uint32_t dimmer_value[NUM_DIMMERS]   = { 0, 0 };
@@ -221,6 +223,10 @@ int main(void)
   dimmer_value[1] = 0;
   dimmer_max[0] = 0;
   dimmer_max[1] = 0;
+  State[0] = 1;
+  State[1] = 1;
+  dimmer_cnt = 0;
+  dimmer_cnt_max = 0;
 
   enc1_dir = 0;
   enc1_cnt = 0;
@@ -565,7 +571,20 @@ void Zero_Crossing_Int(void)
 
 void dimmerTimerISR(void)
 {
+//	for(int i = 0; i < NUM_DIMMERS; i++) {
+//		if(pLampState[i] == 1) {
+//			if(i == 0){
+//				HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
+//				pLampState[i] = false;
+//			}else if(i  == 1){
+//				HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_RESET);
+//				pLampState[i] = false;
+//			}
+//		}
+//	}
+
 	if(zero_cross == 1) {
+		dimmer_cnt++;
 		for(int i = 0; i < NUM_DIMMERS; i++) {
 			if(State[i] == 1) {
 				if(dimmer_Counter[i] > dimmer_value[i] ) {
@@ -582,6 +601,8 @@ void dimmerTimerISR(void)
 					NumHandled++;
 					if(NumHandled == NumActiveChannels) {
 						zero_cross = 0;
+						dimmer_cnt_max = dimmer_cnt;
+						dimmer_cnt = 0;
 					}
 				}
 				else if(isHandled[i] == 0) {
