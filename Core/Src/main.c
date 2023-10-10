@@ -269,15 +269,6 @@ int main(void)
   ILI9341_Set_Address(0, 0, ILI9341_SCREEN_WIDTH-1, ILI9341_SCREEN_HEIGHT-1);
   ILI9341_Set_Rotation(1);
   ILI9341_Fill_Screen(0x0000);
-
-  //ILI9488_Init();
-  //ILI9488_Set_Address(0, 0, ILI9488_SCREEN_WIDTH-1, ILI9488_SCREEN_HEIGHT-1);
-  //ILI9488_Set_Rotation(1);
-  //ILI9488_Fill_Screen(0x0000);
-
-  //IRON_TABLE_Interpolation();
-  //AIR_TABLE_Interpolation();
-
   lv_init();
 
   lv_disp_draw_buf_init(&draw_buf, buf1, buf2, (ILI9341_SCREEN_WIDTH * 10) );		// Initialize the display buffer.
@@ -286,10 +277,6 @@ int main(void)
   disp_drv.flush_cb = ILI9341_Flush_dma;    			// Set your driver function
   disp_drv.hor_res = ILI9341_SCREEN_WIDTH;   			// Set the horizontal resolution of the display
   disp_drv.ver_res = ILI9341_SCREEN_HEIGHT;   			// Set the vertical resolution of the display
-
-  //disp_drv.flush_cb = ILI9488_Flush;					//Set your driver function
-  //disp_drv.hor_res = ILI9488_SCREEN_WIDTH;   			// Set the horizontal resolution of the display
-  //disp_drv.ver_res = ILI9488_SCREEN_HEIGHT;   		// Set the vertical resolution of the display
 
   disp_drv.draw_buf   = &draw_buf;        				// Assign the buffer to the display
   disp_drv.rotated    = LV_DISP_ROT_90;
@@ -675,9 +662,11 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   if(htim->Instance == TIM4) {			// 1us
 
   }
+
   if(htim->Instance == TIM5) {			// 12Khz - 84us
 	  dimmerTimerISR();
   }
+
   if(htim->Instance == TIM10) {			// 120Hz - 8.33ms
 	  HAL_GPIO_WritePin(RELAY_GPIO_Port,RELAY_Pin, GPIO_PIN_SET);
 	  for(uint16_t u = 0; u < 300; u++) {

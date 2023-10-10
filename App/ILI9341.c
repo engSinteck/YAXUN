@@ -12,6 +12,7 @@
 #include "main.h"
 
 unsigned char burst_buffer[BURST_MAX_SIZE];
+int32_t size_spi_dma = 0;
 
 /* Global Variables ------------------------------------------------------------------*/
 volatile uint16_t LCD_HEIGHT = ILI9341_SCREEN_HEIGHT;
@@ -425,11 +426,15 @@ void ILI9341_Flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t 
     HAL_GPIO_WritePin(LCD_DC_PORT, LCD_DC_PIN, GPIO_PIN_SET);
     HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_RESET);
 
+    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+
     HAL_SPI_Transmit(HSPI_INSTANCE, (unsigned char*)color_p, (uint16_t)((size-1)*2), HAL_MAX_DELAY);
 
 	HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_SET);
 
 	lv_disp_flush_ready(disp_drv);                  /* Tell you are ready with the flushing*/
+
+	HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
 }
 
 void ILI9341_Flush_dma(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p)
@@ -439,8 +444,12 @@ void ILI9341_Flush_dma(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_colo
     size = ( ((area->x2 - area->x1) + 1)  * ((area->y2 - area->y1) + 1) );
     ILI9341_Set_Address(area->x1, area->y1, area->x2, area->y2);
 
+    size_spi_dma = size;
+
     HAL_GPIO_WritePin(LCD_DC_PORT, LCD_DC_PIN, GPIO_PIN_SET);
     HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_RESET);
+
+    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
 
     while(!__HAL_SPI_GET_FLAG(HSPI_INSTANCE, SPI_FLAG_TXE));
     HAL_SPI_Transmit_DMA(HSPI_INSTANCE, (unsigned char*)color_p, (uint16_t)((size-1)*2));
@@ -450,4 +459,22 @@ void ILI9341_End_Flush(lv_disp_drv_t * disp_drv)
 {
 	HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_SET);
 	lv_disp_flush_ready(disp_drv);
+	HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+}
+
+void ILI9341_Flush_IT(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_color_t * color_p)
+{
+	int32_t size;
+
+    size = ( ((area->x2 - area->x1) + 1)  * ((area->y2 - area->y1) + 1) );
+    ILI9341_Set_Address(area->x1, area->y1, area->x2, area->y2);
+
+    size_spi_dma = size;
+
+    HAL_GPIO_WritePin(LCD_DC_PORT, LCD_DC_PIN, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(LCD_CS_PORT, LCD_CS_PIN, GPIO_PIN_RESET);
+
+    HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+
+    HAL_SPI_Transmit_IT(HSPI_INSTANCE, (unsigned char*)color_p, (uint16_t)((size-1)*2));
 }
