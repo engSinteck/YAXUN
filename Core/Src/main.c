@@ -112,14 +112,17 @@ uint16_t newCount, prevCount;
 int NumActiveChannels = NUM_DIMMERS;
 volatile bool zero_cross = 0;
 volatile int NumHandled = 0;
-volatile uint32_t dimmer_cnt = 0;
-volatile uint32_t dimmer_cnt_max = 0;
+volatile uint32_t dimmer_cnt[NUM_DIMMERS] = { 0, 0 };
+volatile uint32_t dimmer_cnt_max[NUM_DIMMERS] = { 0, 0 };
 volatile bool isHandled[NUM_DIMMERS] = { 0, 0 };
 uint8_t State [NUM_DIMMERS] = { 1, 1 };
 bool pLampState[2]={ false, false };
 uint32_t dimmer_Counter[NUM_DIMMERS] = { 0, 0 };
 uint32_t dimmer_value[NUM_DIMMERS]   = { 0, 0 };
 uint32_t dimmer_max[NUM_DIMMERS]     = { 0, 0 };
+uint32_t dimmer_tmr = 0;
+uint32_t dimmer_tmr_save = 0;
+uint32_t timer_cnt5_save = 0, timer_cnt5 = 0;
 
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf1[(ILI9341_SCREEN_WIDTH * 10)];                        		// Declare a buffer for 1/10 screen size
@@ -225,8 +228,12 @@ int main(void)
   dimmer_max[1] = 0;
   State[0] = 1;
   State[1] = 1;
-  dimmer_cnt = 0;
-  dimmer_cnt_max = 0;
+  dimmer_cnt[0] = 0;
+  dimmer_cnt[1] = 0;
+  dimmer_cnt_max[0] = 0;
+  dimmer_cnt_max[1] = 0;
+  dimmer_tmr = 0;
+  dimmer_tmr_save = 0;
 
   enc1_dir = 0;
   enc1_cnt = 0;
@@ -564,6 +571,9 @@ void Zero_Crossing_Int(void)
 
 	isHandled[0] = 0;
 	isHandled[1] = 0;
+	dimmer_tmr = 0;
+	timer_cnt5_save = timer_cnt5;
+	timer_cnt5 = 0;
 	zero_cross = 1;
 	HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
 	HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_RESET);
@@ -584,16 +594,18 @@ void dimmerTimerISR(void)
 //	}
 
 	if(zero_cross == 1) {
-		dimmer_cnt++;
+		dimmer_tmr++;
 		for(int i = 0; i < NUM_DIMMERS; i++) {
 			if(State[i] == 1) {
 				if(dimmer_Counter[i] > dimmer_value[i] ) {
 					if(i == 0){
 						HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_SET);
 						pLampState[i] = true;
+						dimmer_cnt[0]++;
 					}else if(i  == 1){
 						HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_SET);
 						pLampState[i] = true;
+						dimmer_cnt[1]++;
 					}
 					dimmer_Counter[i] = 0;
 					isHandled[i] = 1;
@@ -601,8 +613,9 @@ void dimmerTimerISR(void)
 					NumHandled++;
 					if(NumHandled == NumActiveChannels) {
 						zero_cross = 0;
-						dimmer_cnt_max = dimmer_cnt;
-						dimmer_cnt = 0;
+						dimmer_tmr_save = dimmer_tmr;
+						dimmer_cnt_max[i] = dimmer_cnt[i];
+						dimmer_cnt[i] = 0;
 					}
 				}
 				else if(isHandled[i] == 0) {
@@ -681,6 +694,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
   }
 
   if(htim->Instance == TIM5) {			// 12Khz - 84us
+	  timer_cnt5++;
 	  dimmerTimerISR();
   }
 
