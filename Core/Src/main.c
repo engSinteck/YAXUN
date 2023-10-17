@@ -50,6 +50,7 @@ void delay_us (uint16_t us);
 #define DEBOUNCE_SW 		50
 #define NUM_DIMMERS 		2
 #define MAX_TEMPERATURE		525
+#define DIMMER_VALUE_MAX	100
 
 uint16_t adcBuffer[4]; 					// Buffer ADC conversion
 
@@ -112,8 +113,6 @@ uint16_t newCount, prevCount;
 int NumActiveChannels = NUM_DIMMERS;
 volatile bool zero_cross = 0;
 volatile int NumHandled = 0;
-volatile uint32_t dimmer_cnt[NUM_DIMMERS] = { 0, 0 };
-volatile uint32_t dimmer_cnt_max[NUM_DIMMERS] = { 0, 0 };
 volatile bool isHandled[NUM_DIMMERS] = { 0, 0 };
 uint8_t State [NUM_DIMMERS] = { 1, 1 };
 bool pLampState[2]={ false, false };
@@ -228,10 +227,6 @@ int main(void)
   dimmer_max[1] = 0;
   State[0] = 1;
   State[1] = 1;
-  dimmer_cnt[0] = 0;
-  dimmer_cnt[1] = 0;
-  dimmer_cnt_max[0] = 0;
-  dimmer_cnt_max[1] = 0;
   dimmer_tmr = 0;
   dimmer_tmr_save = 0;
 
@@ -375,15 +370,19 @@ int main(void)
 	  	  enc3_last = enc3_cnt;
 	  }
 
-	  if(enc1_last != dimmer_value[0])
+	  if(enc1_last != dimmer_value[0]) {
 		  dimmer_value[0] = enc1_last;
+		  if(dimmer_value[0] >= 100) dimmer_value[0] = 99;
+	  }
 
 	  if(enc2_last != dimmer_value[1])
 		  if(enc2_last > 0 && enc2_last <= 4095)
 			  pwm_iron = enc2_last;
 
-	  if(enc3_last != pwm_iron)
+	  if(enc3_last != pwm_iron) {
 		  dimmer_value[1] = enc3_last;
+	  	  if(dimmer_value[1] >= 100) dimmer_value[1] = 99;
+	  }
 
 	  // Buttons Encoders
 	  KeyboardEvent();
@@ -597,25 +596,19 @@ void dimmerTimerISR(void)
 		dimmer_tmr++;
 		for(int i = 0; i < NUM_DIMMERS; i++) {
 			if(State[i] == 1) {
-				if(dimmer_Counter[i] > dimmer_value[i] ) {
+				if( dimmer_Counter[i] > (DIMMER_VALUE_MAX - dimmer_value[i]) ) {
 					if(i == 0){
 						HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_SET);
 						pLampState[i] = true;
-						dimmer_cnt[0]++;
 					}else if(i  == 1){
 						HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_SET);
 						pLampState[i] = true;
-						dimmer_cnt[1]++;
 					}
-					dimmer_Counter[i] = 0;
 					isHandled[i] = 1;
-
 					NumHandled++;
 					if(NumHandled == NumActiveChannels) {
 						zero_cross = 0;
 						dimmer_tmr_save = dimmer_tmr;
-						dimmer_cnt_max[i] = dimmer_cnt[i];
-						dimmer_cnt[i] = 0;
 					}
 				}
 				else if(isHandled[i] == 0) {
