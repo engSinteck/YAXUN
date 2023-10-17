@@ -118,10 +118,10 @@ uint8_t State [NUM_DIMMERS] = { 1, 1 };
 bool pLampState[2]={ false, false };
 uint32_t dimmer_Counter[NUM_DIMMERS] = { 0, 0 };
 uint32_t dimmer_value[NUM_DIMMERS]   = { 0, 0 };
-uint32_t dimmer_max[NUM_DIMMERS]     = { 0, 0 };
-uint32_t dimmer_tmr = 0;
-uint32_t dimmer_tmr_save = 0;
-uint32_t timer_cnt5_save = 0, timer_cnt5 = 0;
+//uint32_t dimmer_max[NUM_DIMMERS]     = { 0, 0 };
+//uint32_t dimmer_tmr = 0;
+//uint32_t dimmer_tmr_save = 0;
+uint32_t timer_cnt5 = 0;
 
 static lv_disp_draw_buf_t draw_buf;
 static lv_color_t buf1[(ILI9341_SCREEN_WIDTH * 10)];                        		// Declare a buffer for 1/10 screen size
@@ -223,12 +223,8 @@ int main(void)
   dimmer_Counter[1] = 0;
   dimmer_value[0] = 0;
   dimmer_value[1] = 0;
-  dimmer_max[0] = 0;
-  dimmer_max[1] = 0;
   State[0] = 1;
   State[1] = 1;
-  dimmer_tmr = 0;
-  dimmer_tmr_save = 0;
 
   enc1_dir = 0;
   enc1_cnt = 0;
@@ -570,8 +566,6 @@ void Zero_Crossing_Int(void)
 
 	isHandled[0] = 0;
 	isHandled[1] = 0;
-	dimmer_tmr = 0;
-	timer_cnt5_save = timer_cnt5;
 	timer_cnt5 = 0;
 	zero_cross = 1;
 	HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
@@ -580,20 +574,7 @@ void Zero_Crossing_Int(void)
 
 void dimmerTimerISR(void)
 {
-//	for(int i = 0; i < NUM_DIMMERS; i++) {
-//		if(pLampState[i] == 1) {
-//			if(i == 0){
-//				HAL_GPIO_WritePin(DIMMER_1_GPIO_Port, DIMMER_1_Pin, GPIO_PIN_RESET);
-//				pLampState[i] = false;
-//			}else if(i  == 1){
-//				HAL_GPIO_WritePin(DIMMER_2_GPIO_Port, DIMMER_2_Pin, GPIO_PIN_RESET);
-//				pLampState[i] = false;
-//			}
-//		}
-//	}
-
 	if(zero_cross == 1) {
-		dimmer_tmr++;
 		for(int i = 0; i < NUM_DIMMERS; i++) {
 			if(State[i] == 1) {
 				if( dimmer_Counter[i] > (DIMMER_VALUE_MAX - dimmer_value[i]) ) {
@@ -608,13 +589,10 @@ void dimmerTimerISR(void)
 					NumHandled++;
 					if(NumHandled == NumActiveChannels) {
 						zero_cross = 0;
-						dimmer_tmr_save = dimmer_tmr;
 					}
 				}
 				else if(isHandled[i] == 0) {
 					dimmer_Counter[i]++;
-					if(dimmer_Counter[i] > dimmer_max[i])
-						dimmer_max[i] = dimmer_Counter[i];
 				}
 			}
 		}
